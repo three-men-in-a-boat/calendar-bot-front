@@ -1,2 +1,2 @@
-# CalBotFront
-CalBot
+# Calendar Bot Frontend
+Calendar bot
