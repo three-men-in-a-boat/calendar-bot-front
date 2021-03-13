@@ -18,6 +18,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '15'
+      - name: Installing dependencies
         run: npm i
 
       - name: Do linters
