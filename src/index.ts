@@ -1,5 +1,7 @@
-import {Telegraf} from 'telegraf';
+import {Telegraf, Markup, Context} from 'telegraf';
 import {config} from 'dotenv';
+import Base from './Base/base_index';
+import Calendar from './Calendar/calendar_index';
 
 config();
 
@@ -11,12 +13,10 @@ if (!token) {
 }
 
 const bot = new Telegraf(token);
-bot.start(ctx => ctx.reply('Welcome'));
-bot.help(ctx => {
-  ctx.reply('Send me a sticker');
-});
-bot.on('sticker', ctx => ctx.reply('👍'));
-bot.hears('hi', ctx => ctx.reply('Hey there'));
+
+Base(bot);
+Calendar(bot);
+
 bot
   .launch()
   .then(() => {
@@ -26,6 +26,5 @@ bot
     console.log(`There was an error: ${err}`);
   });
 
-// Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
