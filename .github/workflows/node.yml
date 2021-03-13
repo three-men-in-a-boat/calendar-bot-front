@@ -1,4 +1,4 @@
-name: Node Calendar Bot
+name: Node
 
 on:
   push:
@@ -15,11 +15,12 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set up Node
-      - uses: actions/setup-node@v1
+        uses: actions/setup-node@v1
         with:
           node-version: '15'
       - run: npm i
 
-      - name: Do and check linters
-      - run: npm run fix
-      - run: npm run lint
+      - name: Do linters
+        run: npm run fix
+      - name: Check linters
+        run: npm run lint
