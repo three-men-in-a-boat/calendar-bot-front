@@ -23,5 +23,6 @@ jobs:
 
       - name: Do linters
         run: npm run fix
+
       - name: Check linters
         run: npm run lint
