@@ -8,7 +8,7 @@ on:
 
 
 jobs:
-  lint:
+  linters:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,9 +20,6 @@ jobs:
           node-version: '15'
       - name: Installing dependencies
         run: npm i
-
-      - name: Do linters
-        run: npm run fix
 
       - name: Check linters
         run: npm run lint
