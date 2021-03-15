@@ -1,4 +1,4 @@
-import {Telegraf, Markup, Context} from 'telegraf';
+import {Telegraf} from 'telegraf';
 import {config} from 'dotenv';
 import Base from './Base/base_index';
 import Calendar from './Calendar/calendar_index';
