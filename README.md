@@ -1,6 +1,8 @@
 # Frontemnd of telegram bot for mail.ru calendar:
 
-![.github/workflows/node.yml](https://github.com/three-men-in-a-boat/calendar-bot-front/workflows/Linters/badge.svg)
+
+![.github/workflows/linters.yml](https://github.com/three-men-in-a-boat/calendar-bot-front/workflows/Linters/badge.svg)
+![.github/workflows/deploy_prod.yml](https://github.com/three-men-in-a-boat/calendar-bot-front/workflows/DeployProd/badge.svg)
 
 * [Telegram bot](https://t.me/three_man_in_boat_bot)
 * [Telegram dev bot](https://t.me/three_man_in_boat_bot)
