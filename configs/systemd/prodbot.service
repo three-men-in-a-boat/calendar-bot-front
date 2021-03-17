@@ -1,0 +1,13 @@
+[Unit]
+Description = ProdBot
+After = network.target
+
+[Service]
+Type=simple
+User=centos
+Restart=on-failure
+WorkingDirectory=/home/centos/calendar-bot-front/
+ExecStart=/usr/bin/npm start
+
+[Install]
+WantedBy = multi-user.target
