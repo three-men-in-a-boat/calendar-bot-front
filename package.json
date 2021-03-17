@@ -8,7 +8,7 @@
     "lint": "gts lint",
     "clean": "gts clean",
     "compile": "tsc",
-    "start": "tsc && node dist/index.js",
+    "start": "ts-node ./src/index.ts",
     "dev": "nodemon",
     "fix": "gts fix"
   },
@@ -30,7 +30,8 @@
     "@types/axios": "^0.14.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
-    "telegraf": "^4.2.1"
+    "telegraf": "^4.2.1",
+    "ts-node": "^9.1.1"
   },
   "devDependencies": {
     "@types/node": "^14.11.2",
@@ -49,7 +50,7 @@
     "watch": [
       "."
     ],
-    "exec": "npm run compile",
+    "exec": "npm run start",
     "ext": "ts"
   }
 }
