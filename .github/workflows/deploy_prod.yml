@@ -21,6 +21,8 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             cd calendar-bot-front/
+            git checkout main
+            git pull origin main
             npm i
 
 
