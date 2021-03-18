@@ -1,12 +1,12 @@
 [Unit]
-Description = ProdBot
+Description = DevBot
 After = network.target
 
 [Service]
 Type=simple
 User=centos
 Restart=on-failure
-WorkingDirectory=/home/centos/prod-bot/
+WorkingDirectory=/home/centos/dev-bot/
 ExecStart=/usr/bin/npm start
 
 [Install]
