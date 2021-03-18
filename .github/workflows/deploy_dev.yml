@@ -1,15 +1,15 @@
-name: DeployProd
+name: DeployDev
 
 on:
   push:
-    branches: [ main ]
+    branches: [ dev ]
   pull_request:
-    branches: [ main ]
+    branches: [ dev ]
     types: [ closed ]
 
 jobs:
 
-  deploy-prod:
+  deploy-dev:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +20,10 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
-            cd prod-bot/
-            git checkout main
-            git pull origin main
+            cd dev-bot/
+            git checkout dev
+            git pull origin dev
             npm i
-            sudo systemctl restart prodbot
+            sudo systemctl restart devbot
 
 
