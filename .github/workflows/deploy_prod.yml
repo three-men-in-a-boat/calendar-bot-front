@@ -22,6 +22,7 @@ jobs:
           script: |
             cd prod-bot/
             git checkout main
+            git stash
             git pull origin main
             npm i
             sudo systemctl restart prodbot
