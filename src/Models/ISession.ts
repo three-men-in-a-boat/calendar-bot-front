@@ -1,9 +1,9 @@
-import {Context} from "telegraf";
+import {Context} from 'telegraf';
 
 interface SessionData {
-    actionName: string
+  actionName: string;
 }
 
 export default interface CustomContext extends Context {
-    session?: SessionData
+  session?: SessionData;
 }
