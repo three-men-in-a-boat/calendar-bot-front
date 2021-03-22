@@ -22,6 +22,7 @@ jobs:
           script: |
             cd dev-bot/
             git checkout dev
+            git stash
             git pull origin dev
             npm i
             sudo systemctl restart devbot
