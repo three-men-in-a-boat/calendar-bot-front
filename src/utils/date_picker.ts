@@ -4,7 +4,12 @@ import CustomContext from "../Models/ISession";
 function getWeekByDate(date: Date): Array<Date> {
     const buff = new Date(date);
 
-    date.setDate(date.getDate() - date.getDay() + 1);
+    if (buff.getDay()) {
+        date.setDate(date.getDate() - date.getDay() + 1);
+    } else {
+        date.setDate(date.getDate() - 6);
+    }
+    date.setHours(10, 0, 0, 0)
 
     let arr = [];
     if (buff.getMonth() === date.getMonth()) {
@@ -27,27 +32,54 @@ function DatePicker(bot: Telegraf<CustomContext>) {
     bot.action(/nextWeek/, ctx => {
         const data = JSON.parse(ctx.match.input);
         const prevMonday = new Date(data.p);
+        const month = prevMonday.getMonth();
         prevMonday.setDate(prevMonday.getDate() + 7)
         const nextWeek = getWeekByDate(prevMonday);
 
-        return ctx.editMessageText('Выберете дату',
-            renderInlineWeekKeyboard(nextWeek, data.an)
+        return ctx.editMessageText('Выберите дату',
+            renderInlineWeekKeyboard(nextWeek, month, ctx.session!.actionName)
         )
 
+    })
+
+    bot.command('test', ctx => {
+        let date = new Date();
+        date.setMonth(1, 1);
+
+        return ctx.reply(String(getWeekByDate(date)));
     })
 
     bot.action(/prevWeek/, ctx => {
         const data = JSON.parse(ctx.match.input);
-        const nextMonday = new Date(data.p);
-        nextMonday.setDate(nextMonday.getDate() - 7)
-        const prevWeek = getWeekByDate(nextMonday);
+        const nextSunday = new Date(data.p);
+        const month = nextSunday.getMonth();
+        nextSunday.setDate(nextSunday.getDate() - 1)
+        const prevWeek = getWeekByDate(nextSunday);
 
         return ctx.editMessageText('Выберете дату',
-            renderInlineWeekKeyboard(prevWeek,data.an)
+            renderInlineWeekKeyboard(prevWeek, month, ctx.session!.actionName)
         )
 
     })
 
+    bot.action('selectMonth', ctx => {
+        const currDate = new Date();
+
+        return ctx.editMessageText(`Выберите месяц ${currDate.getFullYear()}`, renderInlineMonthKeyboard())
+    })
+
+    bot.action(/showWeek/, ctx => {
+        const data = JSON.parse(ctx.match.input);
+
+        let date = new Date();
+        date.setMonth(data.p, 2);
+
+        const week = getWeekByDate(new Date(date));
+
+        return ctx.editMessageText('Выберите день',
+            renderInlineWeekKeyboard(week, date.getMonth(), ctx.session!.actionName)
+        )
+    })
 
 }
 
@@ -77,7 +109,7 @@ function renderDay(date: Date): string {
 }
 
 function renderArrows(week: Array<Date>, actionName: string) {
-    if (week.length < 7 || week[0].getDate() === 1) {
+    if (week.length < 7 || week[0].getDate() === 1 || week[6].getDate() === 31) {
         if (week[0].getDate() === 1) {
             return [Markup.button.callback('>>', JSON.stringify({a: 'nextWeek', p: week[0]}))]
         } else {
@@ -86,35 +118,62 @@ function renderArrows(week: Array<Date>, actionName: string) {
     }
 
     return [
-        Markup.button.callback('<<', JSON.stringify({a: 'prevWeek', p: week[0], an: actionName})),
-        Markup.button.callback('>>', JSON.stringify({a: 'nextWeek', p: week[0], an: actionName}))
+        Markup.button.callback('<<', JSON.stringify({a: 'prevWeek', p: week[0]})),
+        Markup.button.callback('>>', JSON.stringify({a: 'nextWeek', p: week[0]}))
     ]
 }
 
-function renderInlineWeekKeyboard(week: Array<Date>, actionName: string) {
+function renderInlineWeekKeyboard(week: Array<Date>, month: number, actionName: string) {
 
-    const currentDate = new Date();
+    const date = new Date();
+    date.setMonth(month)
 
     return Markup.inlineKeyboard(
         [
-            [Markup.button.callback(`${
-                normalizeStr(currentDate.toLocaleString('ru', {month: 'long'}))
+            [Markup.button.callback(`<< ${
+                normalizeStr(date.toLocaleString('ru', {month: 'long'}))
             } ${
-                currentDate.getFullYear()
-            }`, 'test')],
+                date.getFullYear()
+            }`, 'selectMonth')],
             ...week.map(curr => {
-                return [Markup.button.callback(renderDay(curr), JSON.stringify({a:actionName, p: curr}))]
+                return [Markup.button.callback(renderDay(curr), JSON.stringify({a: actionName, p: curr}))]
             }),
             renderArrows(week, actionName)
         ],
     )
 }
 
+function genMonthButtons() {
+    const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май',
+        'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+
+    let res = [];
+    for (let i = 0; i < months.length; ++i) {
+        res.push(
+            [
+                Markup.button.callback(months[i], JSON.stringify({a: 'showWeek', p: i})),
+                Markup.button.callback(months[i + 1], JSON.stringify({a: 'showWeek', p: i + 1}))
+            ]
+        )
+        ++i;
+    }
+
+    return res;
+}
+
+function renderInlineMonthKeyboard() {
+    return Markup.inlineKeyboard(genMonthButtons())
+}
+
 function genDatepicker(ctx: CustomContext, actionName: string) {
     const week = getWeekByDate(new Date());
+    const currDate = new Date();
+
+    ctx.session = {actionName: actionName}
 
     return ctx.reply('Выберите дату:',
-        renderInlineWeekKeyboard(week, actionName)
+        renderInlineWeekKeyboard(week, currDate.getMonth(), actionName)
     );
 
 }

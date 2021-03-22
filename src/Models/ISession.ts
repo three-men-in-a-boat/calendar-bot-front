@@ -1,7 +1,7 @@
 import {Context} from "telegraf";
 
 interface SessionData {
-    selectedDate: Date
+    actionName: string
 }
 
 export default interface CustomContext extends Context {
