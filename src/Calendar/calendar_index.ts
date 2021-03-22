@@ -1,8 +1,11 @@
 import Today from './today';
 import Tomorrow from './tomorrow';
-import {Context, Telegraf} from 'telegraf';
+import {Telegraf} from 'telegraf';
+import SelectedDate from "./selected_date";
+import CustomContext from "../Models/ISession";
 
-export default function Calendar(bot: Telegraf<Context>) {
+export default function Calendar(bot: Telegraf<CustomContext>) {
   Today(bot);
   Tomorrow(bot);
+  SelectedDate(bot);
 }
