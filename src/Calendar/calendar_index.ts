@@ -2,7 +2,7 @@ import Today from './today';
 import Tomorrow from './tomorrow';
 import {Telegraf} from 'telegraf';
 import SelectedDate from './selected_date';
-import CustomContext from '../Models/ISession';
+import CustomContext from '../Models/Session';
 
 export default function Calendar(bot: Telegraf<CustomContext>) {
   Today(bot);

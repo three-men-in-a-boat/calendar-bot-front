@@ -1,5 +1,5 @@
 import {Telegraf, Markup} from 'telegraf';
-import CustomContext from '../Models/ISession';
+import CustomContext from '../Models/Session';
 
 function getWeekByDate(date: Date): Array<Date> {
   const buff = new Date(date);
