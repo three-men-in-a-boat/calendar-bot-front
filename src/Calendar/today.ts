@@ -69,6 +69,7 @@ export default function Today(bot: Telegraf<Context>) {
     //     } with \n\t\t\t ${pars}`;
     // });
 
+
     return ctx.reply(
       'События на сегодня',
       Markup.inlineKeyboard(
