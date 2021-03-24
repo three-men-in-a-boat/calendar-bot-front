@@ -124,14 +124,13 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
             const title = ctx.update.callback_query.message.text.split('\n')[0]
 
             let event: Event;
-            let events = resp.data.data.events;
-            if (Array.isArray(events)) {
-                let eventsArray = events as Array<Event>;
+            if (resp.data.data) {
+                let eventsArray:Array<Event> = resp.data.data.events;
                 event = eventsArray.filter(curr => {
                     return curr.title === title;
                 })[0]
             } else {
-                event = events as Event;
+                event = resp.data as Event;
             }
 
             ctx.editMessageText(
@@ -158,14 +157,13 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
             const title = ctx.update.callback_query.message.text.split('\n')[0]
 
             let event: Event;
-            let events = resp.data.data.events;
-            if (Array.isArray(events)) {
-                let eventsArray = events as Array<Event>;
+            if (resp.data.data) {
+                let eventsArray:Array<Event> = resp.data.data.events;
                 event = eventsArray.filter(curr => {
                     return curr.title === title;
                 })[0]
             } else {
-                event = events as Event;
+                event = resp.data as Event;
             }
 
             ctx.editMessageText(
