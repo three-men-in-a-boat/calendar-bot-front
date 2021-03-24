@@ -1,16 +1,18 @@
 import User from './User';
+import CalendarInfo from "./CalendarInfo";
+import Location from "./Location";
 
-export default interface Meeting {
-  name: string;
-  time_from?: string;
-  time_to?: string;
-  all_day: boolean;
-  repeating: boolean;
-  repeating_info?: string;
-  participants: Array<string>;
-  call_link?: string;
+export default interface Event {
+  uid: string
+  title: string;
+  from?: string;
+  to?: string;
+  fullDay: boolean;
   description?: string;
-  calendar: string;
-  remember_info?: string;
-  place?: string;
+  location?: Location;
+  calendar: CalendarInfo
+  call?: string
+  attendees: Array<User>
+  organizer: User
+  payload?: string
 }
