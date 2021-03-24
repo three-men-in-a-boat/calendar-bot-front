@@ -1,4 +1,4 @@
-import CustomContext from '../Models/Session';
+import CustomContext from '../Models/CustomContext';
 import {genDatepicker} from '../utils/date_picker';
 import {Telegraf} from 'telegraf';
 
