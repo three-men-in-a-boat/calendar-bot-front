@@ -1,11 +1,11 @@
 import Today from './today';
-import Tomorrow from './tomorrow';
 import {Telegraf} from 'telegraf';
 import SelectedDate from './selected_date';
 import CustomContext from '../Models/CustomContext';
+import Next from "./next";
 
 export default function Calendar(bot: Telegraf<CustomContext>) {
   Today(bot);
-  Tomorrow(bot);
   SelectedDate(bot);
+  Next(bot);
 }

@@ -6,7 +6,7 @@ export default function Help(bot: Telegraf<Context>) {
       'Это бот для работы с календарем. Сейчас доступны следующие команды',
       Markup.inlineKeyboard([
         Markup.button.callback('События на сегодня', 'today'),
-        Markup.button.callback('События на завтра', 'tomorrow'),
+        Markup.button.callback('Следующее событие', 'next'),
       ])
     );
   });
