@@ -2,31 +2,8 @@ import {Context, Markup, Telegraf} from 'telegraf';
 import {default as axios} from 'axios';
 import Event from '../Models/Meeting';
 import {callback} from 'telegraf/typings/button';
+import {EventCard} from "../utils/event_card";
 
-function renderKeyboard(events: Array<Event>) {
-    return Markup.inlineKeyboard(
-        events.map((meet, idx) => {
-            let from = new Date();
-            let to = new Date();
-            if (!meet.fullDay) {
-                from = new Date(meet.from!);
-                to = new Date(meet.to!)
-            }
-            return [
-                Markup.button.callback(
-                    `${meet.title}
-            ${
-                        meet.fullDay
-                            ? 'весь день'
-                            : `${from.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric'})} - ` +
-                            `${to.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric'})}`
-                    }`,
-                    JSON.stringify({a: 'show_full', p: idx})
-                ),
-            ];
-        })
-    )
-}
 
 export default function Today(bot: Telegraf<Context>) {
     async function todayCallback(ctx: Context) {
@@ -48,11 +25,9 @@ export default function Today(bot: Telegraf<Context>) {
 
             const events: Array<Event> = resp.data.data.events;
 
-
-            return ctx.reply(
-                'События на сегодня',
-                renderKeyboard(events)
-            );
+            for (let event of events) {
+                await EventCard(ctx, event, 'today');
+            }
         } else {
             return ctx.reply(`${err}`)
         }
@@ -66,14 +41,7 @@ export default function Today(bot: Telegraf<Context>) {
         return todayCallback(ctx);
     });
 
-    bot.action(/show_full/, ctx => {
-        const info = JSON.parse(ctx.match.input);
 
-        ctx.editMessageText(
-            'm.name',
-            Markup.inlineKeyboard([Markup.button.callback('Назад', 'today_upd')])
-        );
-    });
 
     bot.action('today_upd', ctx => {
         return ctx.editMessageText(
