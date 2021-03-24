@@ -100,9 +100,9 @@ function renderDay(date: Date): string {
   const currDate = new Date();
 
   if (isEqualDates(currDate, date)) {
-    return `>> ${date.getDate()} - ${normalizeStr(
+    return `🔹 ${date.getDate()} - ${normalizeStr(
       date.toLocaleString('ru', {weekday: 'long'})
-    )} <<`;
+    )}`;
   } else {
     return `${date.getDate()} - ${normalizeStr(
       date.toLocaleString('ru', {weekday: 'long'})
@@ -115,14 +115,14 @@ function renderArrows(week: Array<Date>) {
     if (week[0].getDate() === 1) {
       return [
         Markup.button.callback(
-          '>>',
+          '➡',
           JSON.stringify({a: 'nextWeek', p: week[0]})
         ),
       ];
     } else {
       return [
         Markup.button.callback(
-          '<<',
+          '⬅',
           JSON.stringify({a: 'prevWeek', p: week[0]})
         ),
       ];
@@ -130,8 +130,8 @@ function renderArrows(week: Array<Date>) {
   }
 
   return [
-    Markup.button.callback('<<', JSON.stringify({a: 'prevWeek', p: week[0]})),
-    Markup.button.callback('>>', JSON.stringify({a: 'nextWeek', p: week[0]})),
+    Markup.button.callback('⬅', JSON.stringify({a: 'prevWeek', p: week[0]})),
+    Markup.button.callback('➡', JSON.stringify({a: 'nextWeek', p: week[0]})),
   ];
 }
 
@@ -146,7 +146,7 @@ function renderInlineWeekKeyboard(
   return Markup.inlineKeyboard([
     [
       Markup.button.callback(
-        `<< ${normalizeStr(
+        `⬅ ${normalizeStr(
           date.toLocaleString('ru', {month: 'long'})
         )} ${date.getFullYear()}`,
         'selectMonth'

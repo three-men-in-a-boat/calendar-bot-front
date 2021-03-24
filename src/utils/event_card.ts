@@ -6,17 +6,17 @@ import axios from "axios";
 function renderButtons(id: string, url: string, extended: boolean = false, callLink: string|undefined = undefined) {
     if (!extended) {
         return Markup.inlineKeyboard([
-            Markup.button.callback('Развернуть', JSON.stringify({a: 'show_more', p: url})),
+            Markup.button.callback('🔻 Развернуть', JSON.stringify({a: 'show_more', p: url})),
         ])
     } else {
         if (callLink) {
             return Markup.inlineKeyboard([
-                [Markup.button.url('Ссылка на звонок', callLink)],
-                [Markup.button.callback('Свернуть', JSON.stringify({a: 'show_less', p: url}))],
+                [Markup.button.url('📲 Ссылка на звонок', callLink)],
+                [Markup.button.callback('🔺 Свернуть', JSON.stringify({a: 'show_less', p: url}))],
             ])
         } else {
             return Markup.inlineKeyboard([
-                Markup.button.callback('Свернуть', JSON.stringify({a: 'show_less', p: url})),
+                Markup.button.callback('🔺 Свернуть', JSON.stringify({a: 'show_less', p: url})),
             ])
         }
 
@@ -27,13 +27,17 @@ function genHeader(event: Event) {
     let from = new Date();
     let to = new Date();
 
+    if (!event) {
+        return ''
+    }
+
     if (!event.fullDay) {
         from = new Date(event.from!);
         to = new Date(event.to!);
     }
 
     let replyMdStr = ''
-    replyMdStr += event.title + '\n\n'
+    replyMdStr += event.title + '\n\n⏰ '
     if (event.fullDay) {
         replyMdStr += 'Весь день';
     } else {
@@ -51,7 +55,7 @@ function createShortMdStr(event: Event) {
     replyMdStr += '\n';
 
     replyMdStr += '-------------------------------------\n';
-    replyMdStr += `Календарь ${event.calendar.title}`
+    replyMdStr += `🗓 Календарь ${event.calendar.title}`
 
     return replyMdStr
 }
@@ -70,7 +74,7 @@ function createFullMdStr(event: Event) {
         if (user.email !== 'calendar@internal') {
             if (!sendTitleAtt) {
                 replyMdStr += '-------------------------------------\n';
-                replyMdStr += 'Участники:\n';
+                replyMdStr += '✅ Участники:\n';
                 sendTitleAtt = true;
             }
             replyMdStr += '\n' + user.name + ' (' + user.email + ') '
@@ -84,7 +88,7 @@ function createFullMdStr(event: Event) {
 
     if (event.description) {
         replyMdStr += '-------------------------------------\n';
-        replyMdStr += 'Описание\n\n';
+        replyMdStr += '📋 Описание\n\n';
         replyMdStr += event.description;
         replyMdStr += '\n'
     }
@@ -92,7 +96,7 @@ function createFullMdStr(event: Event) {
 
 
     replyMdStr += '-------------------------------------\n';
-    replyMdStr += `Календарь ${event.calendar.title}`
+    replyMdStr += `🗓 Календарь ${event.calendar.title}`
 
     return replyMdStr
 }
