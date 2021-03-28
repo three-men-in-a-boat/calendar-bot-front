@@ -2,10 +2,9 @@ import {session, Telegraf} from 'telegraf';
 import CustomContext from './Models/CustomContext';
 import {config} from 'dotenv';
 import Base from './Base/base_index';
-import Calendar from './Calendar/calendar_index';
 import AuthMiddleware from './Middlewares/auth_middleware';
-import {DatePicker} from './utils/date_picker';
 import {EventCardHandler} from "./utils/event_card";
+import Calendar from "./Calendar/calendar_index";
 
 config();
 
@@ -19,11 +18,10 @@ if (!token) {
 const bot = new Telegraf<CustomContext>(token);
 
 bot.use(session());
-bot.use(AuthMiddleware);
+// bot.use(AuthMiddleware);
 
 Base(bot);
-Calendar(bot);
-DatePicker(bot);
+Calendar(bot)
 EventCardHandler(bot);
 
 bot

@@ -1,28 +1,31 @@
 import CustomContext from '../Models/CustomContext';
-import {genDatepicker} from '../utils/date_picker';
 import {Markup, Telegraf} from 'telegraf';
 import axios, {AxiosError} from "axios";
 import {EventCard} from "../utils/event_card";
 import Event from "../Models/Meeting";
 import getId from "../utils/getId";
+// @ts-ignore
+import Calendar from 'telegraf-calendar-telegram';
 
 export default function SelectedDate(bot: Telegraf<CustomContext>) {
-    bot.command('date', ctx => {
-        return genDatepicker(ctx, 'selected');
+
+    const calendar = new Calendar(bot,{
+        startWeekDay: 1,
+        weekDayNames: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+        monthNames: [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ],
+        minDate: new Date(new Date().getFullYear(), 0, 1),
+        maxDate: new Date(new Date().getFullYear(), 11, 31)
     });
 
-    bot.action('date', ctx => {
-        return genDatepicker(ctx, 'selected');
-    })
-
-    bot.action(/selected/, async ctx => {
-        const data = JSON.parse(ctx.match.input);
-
-        if (ctx.update.callback_query.message) {
+    calendar.setDateListener(async (ctx: CustomContext, date: string) => {
+        if ("callback_query" in ctx.update && ctx.update.callback_query.message) {
             await ctx.deleteMessage(ctx.update.callback_query.message.message_id);
         }
 
-        const rfc3339 = new Date(data.p).toISOString();
+        const rfc3339 = new Date(date).toISOString();
         const id = getId(ctx);
 
         axios.get(`${process.env['BACKEND_URL']}/telegram/user/${id}/events/date/${rfc3339}`)
@@ -42,7 +45,17 @@ export default function SelectedDate(bot: Telegraf<CustomContext>) {
                 }
             })
             .catch((err: AxiosError) => {
-                ctx.reply(`Select date fall with err: ${err.message}`)
+                return ctx.reply(`Select date fall with err: ${err.message}`)
             })
+
+    })
+
+    bot.command('date', ctx => {
+
+        return ctx.reply('Выберите дату', calendar.getCalendar());
     });
+
+    bot.action('date', ctx => {
+
+    })
 }
