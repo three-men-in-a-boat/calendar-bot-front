@@ -63,13 +63,20 @@ function genHeader(event: Event) {
     return replyMdStr
 }
 
+function genFooter(event: Event) {
+    let replyMdStr = ''
+    replyMdStr += '-------------------------------------\n';
+    replyMdStr += `🗓 Календарь ${event.calendar.title}`
+
+    return replyMdStr
+}
+
 function createShortMdStr(event: Event) {
     let replyMdStr = genHeader(event);
 
     replyMdStr += '\n';
 
-    replyMdStr += '-------------------------------------\n';
-    replyMdStr += `🗓 Календарь ${event.calendar.title}`
+    replyMdStr += genFooter(event);
 
     return replyMdStr
 }
@@ -91,7 +98,7 @@ function createFullMdStr(event: Event) {
                 replyMdStr += '✅ Участники:\n';
                 sendTitleAtt = true;
             }
-            replyMdStr += '\n' + user.name + ' (' + user.email + ') '
+            replyMdStr += '\n' + user.name? user.name : ''  + ' (' + user.email + ') '
             if (event.organizer.email === user.email) {
                 replyMdStr += ' - Организатор'
             }
@@ -108,8 +115,7 @@ function createFullMdStr(event: Event) {
     }
 
 
-    replyMdStr += '-------------------------------------\n';
-    replyMdStr += `🗓 Календарь ${event.calendar.title}`
+    replyMdStr += genFooter(event);
 
     return replyMdStr
 }
@@ -140,24 +146,24 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
 
                 let event: Event;
                 if (resp.data.data) {
-                    let eventsArray:Array<Event> = resp.data.data.events;
+                    let eventsArray: Array<Event> = resp.data.data.events;
                     event = eventsArray.filter(curr => {
                         return curr.title === title;
                     })[0]
                 } else {
                     event = resp.data as Event;
                 }
-        ctx.editMessageText(
-            createFullMdStr(event),
-            {
-                parse_mode: 'Markdown',
-                reply_markup: renderButtons(event.uid, data.p, true, event.call)
-            }
-        )
-        })
-        .catch((err:AxiosError) => {
-            ctx.reply(`Show more callback error: ${err.message}`)
-        })
+                ctx.editMessageText(
+                    createFullMdStr(event),
+                    {
+                        parse_mode: 'Markdown',
+                        reply_markup: renderButtons(event.uid, data.p, true, event.call)
+                    }
+                )
+            })
+            .catch((err: AxiosError) => {
+                ctx.reply(`Show more callback error: ${err.message}`)
+            })
     })
 
 
@@ -183,13 +189,13 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
                 ctx.editMessageText(
                     createShortMdStr(event),
                     {
-                        parse_mode:'Markdown',
+                        parse_mode: 'Markdown',
                         reply_markup: renderButtons(event.uid, data.p)
                     }
                 )
             })
             .catch((err: AxiosError) => {
-                ctx.reply(`Show less callback fall with err: ${err}`);
+                ctx.reply(`Show less callback fall with err: ${err.message}`);
             })
     })
 }
