@@ -51,13 +51,28 @@ function genHeader(event: Event) {
     }
 
     let replyMdStr = ''
-    replyMdStr += `*${event.title}*` + '\n\n⏰ '
+    replyMdStr += `<b>${event.title}</b>` + '\n\n⏰ '
     if (event.fullDay) {
         replyMdStr += 'Весь день';
     } else {
-        replyMdStr += from.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric'});
+        if (from.getDate() === new Date().getDate()) {
+            replyMdStr += 'Cегодня '
+        } else if (from.getDate() === new Date().getDate() + 1) {
+            replyMdStr += 'Завтра '
+        } else if (from.getDate() === new Date().getDate() - 1) {
+            replyMdStr += 'Вчера '
+        } else {
+            replyMdStr += from.toLocaleDateString('ru', {day: 'numeric', month: 'long'})
+            if (from.getDay() !== to.getDay()) {
+                replyMdStr += ' - ' + to.toLocaleDateString('ru', {day: 'numeric', month: 'long'})
+            }
+        }
+
+        replyMdStr += ' <u>'
+        replyMdStr += from.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric', timeZone: 'UTC'});
         replyMdStr += ' - ';
-        replyMdStr += to.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric'});
+        replyMdStr += to.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric', timeZone: 'UTC'});
+        replyMdStr += '</u>'
     }
 
     return replyMdStr
@@ -95,10 +110,10 @@ function createFullMdStr(event: Event) {
         if (user.email !== 'calendar@internal') {
             if (!sendTitleAtt) {
                 replyMdStr += '-------------------------------------\n';
-                replyMdStr += '✅ Участники:\n';
+                replyMdStr += '✅ <u><i>Участники:</i></u>\n\n';
                 sendTitleAtt = true;
             }
-            replyMdStr += '\n' + user.name? user.name : ''  + ' (' + user.email + ') '
+            replyMdStr += '\n' + (user.name ? user.name : '') + ' (' + user.email + ') '
             if (event.organizer.email === user.email) {
                 replyMdStr += ' - Организатор'
             }
@@ -109,7 +124,7 @@ function createFullMdStr(event: Event) {
 
     if (event.description) {
         replyMdStr += '-------------------------------------\n';
-        replyMdStr += '📋 Описание\n\n';
+        replyMdStr += '📋 <u><i>Описание</i></u>\n\n';
         replyMdStr += event.description;
         replyMdStr += '\n'
     }
@@ -126,7 +141,7 @@ function EventCard(ctx: CustomContext, event: Event, url: string) {
     return ctx.reply(
         replyMdStr,
         {
-            parse_mode: 'Markdown',
+            parse_mode: 'HTML',
             reply_markup: renderButtons(event.uid, url)
         }
     )
@@ -156,7 +171,7 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
                 ctx.editMessageText(
                     createFullMdStr(event),
                     {
-                        parse_mode: 'Markdown',
+                        parse_mode: 'HTML',
                         reply_markup: renderButtons(event.uid, data.p, true, event.call)
                     }
                 )
@@ -189,7 +204,7 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
                 ctx.editMessageText(
                     createShortMdStr(event),
                     {
-                        parse_mode: 'Markdown',
+                        parse_mode: 'HTML',
                         reply_markup: renderButtons(event.uid, data.p)
                     }
                 )
