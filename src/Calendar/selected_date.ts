@@ -11,6 +11,10 @@ export default function SelectedDate(bot: Telegraf<CustomContext>) {
         return genDatepicker(ctx, 'selected');
     });
 
+    bot.action('date', ctx => {
+        return genDatepicker(ctx, 'selected');
+    })
+
     bot.action(/selected/, async ctx => {
         const data = JSON.parse(ctx.match.input);
 
