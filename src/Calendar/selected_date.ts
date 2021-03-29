@@ -45,6 +45,9 @@ export default function SelectedDate(bot: Telegraf<CustomContext>) {
                 }
             })
             .catch((err: AxiosError) => {
+                if (err.response?.status === 404) {
+                    return ctx.reply('На выбранную дату у вас нет событий');
+                }
                 return ctx.reply(`Select date fall with err: ${err.message}`)
             })
 

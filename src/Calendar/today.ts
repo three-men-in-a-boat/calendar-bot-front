@@ -14,6 +14,9 @@ async function todayCallback(ctx: Context) {
             }
         })
         .catch((err:AxiosError) => {
+            if (err.response?.status === 404) {
+                return ctx.reply('У вас больше нет событий на сегодня');
+            }
             return ctx.reply(`${err.message}`)
         })
 
