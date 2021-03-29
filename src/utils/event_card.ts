@@ -19,7 +19,7 @@ function renderButtons(id: string, url: string, extended: boolean = false, callL
 
             return {
                 inline_keyboard: [
-                    [{text: '📲 Ссылка на звонок', callback_data: callLink}],
+                    [{text: '📲 Ссылка на звонок', url: callLink}],
                     [{text: '🔺 Свернуть', callback_data: JSON.stringify({a: 'show_less', p: url})}]
                 ]
             }
