@@ -18,7 +18,7 @@ if (!token) {
 const bot = new Telegraf<CustomContext>(token);
 
 bot.use(session());
-// bot.use(AuthMiddleware);
+bot.use(AuthMiddleware);
 
 Base(bot);
 Calendar(bot)
