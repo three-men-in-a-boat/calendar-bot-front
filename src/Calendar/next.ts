@@ -11,6 +11,9 @@ function NextCallback(ctx: CustomContext) {
             return EventCard(ctx, resp.data as Event, 'closest');
         })
         .catch((err:AxiosError) => {
+            if (err.response?.status === 404) {
+                return ctx.reply('У вас нет больше событий на сегодня');
+            }
             return ctx.reply(`Next callback fall with error: ${err.message}`);
         })
 }

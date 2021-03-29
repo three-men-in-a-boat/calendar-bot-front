@@ -81,7 +81,7 @@ function genHeader(event: Event) {
 function genFooter(event: Event) {
     let replyMdStr = ''
     replyMdStr += '-------------------------------------\n';
-    replyMdStr += `🗓 Календарь ${event.calendar.title}`
+    replyMdStr += `🗓 Календарь <b>${event.calendar.title}</b>`
 
     return replyMdStr
 }
@@ -110,12 +110,19 @@ function createFullMdStr(event: Event) {
         if (user.email !== 'calendar@internal') {
             if (!sendTitleAtt) {
                 replyMdStr += '-------------------------------------\n';
-                replyMdStr += '✅ <u><i>Участники:</i></u>\n\n';
+                replyMdStr += '<u><i>Участники:</i></u>\n';
                 sendTitleAtt = true;
             }
             replyMdStr += '\n' + (user.name ? user.name : '') + ' (' + user.email + ') '
             if (event.organizer.email === user.email) {
                 replyMdStr += ' - Организатор'
+            }
+            if (user.status === 'ACCEPTED') {
+                replyMdStr += ' ✅'
+            } else if (user.status === 'NEEDS_ACTION') {
+                replyMdStr += ' �'
+            } else {
+                replyMdStr += ' ❌'
             }
         }
     }
