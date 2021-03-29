@@ -3,16 +3,13 @@ import {default as axios, AxiosError} from 'axios';
 import getId from "../utils/getId";
 import CustomContext from "../Models/CustomContext";
 
-function GenResp(ctx: CustomContext, name: string, image: string) {
-    let helloMessage = `Здравствуйте, ${name}! Вы успешно авторизовались в телеграм боте ассистент календаря Mail.ru.`+
+function GenResp(ctx: CustomContext, name: string) {
+    let helloMessage = `Здравствуйте, ${name}! Вы успешно авторизовались в телеграм боте ассистент календаря Mail.ru.` +
         `Теперь вы можете начать пользоваться ботом. Чтобы узнать какие функции доступны в боте - воспользуйтесь ` +
         `командой /help`
 
-    if (image) {
-        return ctx.replyWithPhoto(image, {caption:helloMessage})
-    } else {
-        return ctx.reply(helloMessage)
-    }
+    return ctx.reply(helloMessage)
+
 }
 
 export default async function Start(bot: Telegraf<CustomContext>) {
@@ -20,7 +17,7 @@ export default async function Start(bot: Telegraf<CustomContext>) {
         if (ctx.startPayload) {
             axios.get(`${process.env['BACKEND_URL']}/oauth/telegram/user/${getId(ctx)}/info`)
                 .then(res => {
-                    GenResp(ctx, res.data.name, res.data.image);
+                    GenResp(ctx, res.data.name);
                 })
                 .catch((err: AxiosError) => {
                     return ctx.reply(`Start callback with payload fall with error: ${err.message}`);
