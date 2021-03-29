@@ -17,7 +17,7 @@ export default async function Start(bot: Telegraf<CustomContext>) {
         if (ctx.startPayload) {
             axios.get(`${process.env['BACKEND_URL']}/oauth/telegram/user/${getId(ctx)}/info`)
                 .then(res => {
-                    GenResp(ctx, res.data.name);
+                    return GenResp(ctx, res.data.name);
                 })
                 .catch((err: AxiosError) => {
                     return ctx.reply(`Start callback with payload fall with error: ${err.message}`);
