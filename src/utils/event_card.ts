@@ -2,6 +2,7 @@ import {Markup, Telegraf} from "telegraf";
 import CustomContext from "../Models/CustomContext";
 import Event from "../Models/Meeting";
 import axios, {AxiosError} from "axios";
+import moment from 'moment';
 
 function renderButtons(id: string, url: string, extended: boolean = false, callLink: string | undefined = undefined) {
     if (!extended) {
@@ -52,26 +53,27 @@ function genHeader(event: Event) {
 
     let replyMdStr = ''
     replyMdStr += `<b>${event.title}</b>` + '\n\n⏰ '
+    moment.locale('ru');
     if (event.fullDay) {
         replyMdStr += 'Весь день';
     } else {
         if (from.getDate() === new Date().getDate()) {
-            replyMdStr += 'Cегодня '
+            replyMdStr += 'Cегодня'
         } else if (from.getDate() === new Date().getDate() + 1) {
-            replyMdStr += 'Завтра '
+            replyMdStr += 'Завтра'
         } else if (from.getDate() === new Date().getDate() - 1) {
-            replyMdStr += 'Вчера '
+            replyMdStr += 'Вчера'
         } else {
-            replyMdStr += from.toLocaleDateString('ru', {day: 'numeric', month: 'long'})
+            replyMdStr += moment(event.from!).format('D MMMM YYYY')
             if (from.getDay() !== to.getDay()) {
-                replyMdStr += ' - ' + to.toLocaleDateString('ru', {day: 'numeric', month: 'long'})
+                replyMdStr += ' - ' + moment(event.to!).format('D MMMM YYYY')
             }
         }
 
-        replyMdStr += ' <u>'
-        replyMdStr += from.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric', timeZone: 'UTC'});
+        replyMdStr += ', <u>'
+        replyMdStr += moment(event.from!).format('LT')
         replyMdStr += ' - ';
-        replyMdStr += to.toLocaleTimeString('ru', {hour: 'numeric', minute: 'numeric', timeZone: 'UTC'});
+        replyMdStr += moment(event.to!).format('LT')
         replyMdStr += '</u>'
     }
 
@@ -100,7 +102,7 @@ function createFullMdStr(event: Event) {
     let replyMdStr = genHeader(event);
 
     if (event.location?.description) {
-        replyMdStr += ' - ' + event.location.description;
+        replyMdStr += '\n📍 ' + event.location.description;
     }
 
     replyMdStr += '\n';
@@ -116,13 +118,14 @@ function createFullMdStr(event: Event) {
             replyMdStr += '\n' + (user.name ? user.name : '') + ' (' + user.email + ') '
             if (event.organizer.email === user.email) {
                 replyMdStr += ' - Организатор'
-            }
-            if (user.status === 'ACCEPTED') {
-                replyMdStr += ' ✅'
-            } else if (user.status === 'NEEDS_ACTION') {
-                replyMdStr += ' �'
             } else {
-                replyMdStr += ' ❌'
+                if (user.status === 'ACCEPTED') {
+                    replyMdStr += ' ✅'
+                } else if (user.status === 'NEEDS_ACTION') {
+                    replyMdStr += ' �'
+                } else {
+                    replyMdStr += ' ❌'
+                }
             }
         }
     }
@@ -131,7 +134,7 @@ function createFullMdStr(event: Event) {
 
     if (event.description) {
         replyMdStr += '-------------------------------------\n';
-        replyMdStr += '📋 <u><i>Описание</i></u>\n\n';
+        replyMdStr += '<u><i>Описание</i></u>\n\n';
         replyMdStr += event.description;
         replyMdStr += '\n'
     }
