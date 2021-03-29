@@ -1,40 +1,21 @@
 import {Context, Telegraf} from "telegraf";
 import CustomContext from "../Models/CustomContext";
-import {default as axios} from "axios";
+import {AxiosError, default as axios} from "axios";
 import Event from "../Models/Meeting";
 import {EventCard} from "../utils/event_card";
+import getId from "../utils/getId";
 
-async function NextCallback(ctx: CustomContext) {
-    let resp = null;
-    let err = null;
-    try {
-        if (ctx.message) {
-            resp = await axios.get(
-                `${process.env['BACKEND_URL']}/telegram/user/${ctx.message!.from.id}/events/closest`
-            );
-        } else {
-            if ("callback_query" in ctx.update) {
-                resp = await axios.get(
-                    `${process.env['BACKEND_URL']}/telegram/user/${ctx.update.callback_query.from.id}/events/closest`
-                );
+function NextCallback(ctx: CustomContext) {
+    axios.get(`${process.env['BACKEND_URL']}/telegram/user/${getId(ctx)}/events/closest`)
+        .then(resp => {
+            return EventCard(ctx, resp.data as Event, 'closest');
+        })
+        .catch((err:AxiosError) => {
+            if (err.response?.status === 404) {
+                return ctx.reply('У вас нет больше событий на сегодня');
             }
-        }
-    } catch (e) {
-        err = e;
-    }
-
-    if (resp) {
-
-        if (resp.status !== 200) {
-            return ctx.reply('Что-то пошло не так, попробуйте повторно авторизоваться с помощью команды /start')
-        }
-
-        const event: Event = resp.data;
-
-        return EventCard(ctx, event, 'closest');
-    } else {
-        return ctx.reply(`${err}`)
-    }
+            return ctx.reply(`Next callback fall with error: ${err.message}`);
+        })
 }
 
 export default function Next(bot: Telegraf<Context>) {
