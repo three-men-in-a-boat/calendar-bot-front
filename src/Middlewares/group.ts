@@ -12,9 +12,10 @@ export default async function GroupMiddleware(ctx: CustomContext, next: Function
             if (whitelist.includes(ctx.message.text)) {
                 return next();
             }
+            return ctx.reply('Эта функция еще не поддерживается в групповом чате.')
         }
-        return ctx.reply('Эта функция еще не поддерживается в групповом чате.')
-    } else {
-        return ctx.reply('Group middleware error: ctx.from is undefined');
     }
+    return next();
+
+
 }
