@@ -7,6 +7,7 @@ import {EventCardHandler} from "./utils/event_card";
 import Calendar from "./Calendar/calendar_index";
 import InitMiddleware from "./Middlewares/init";
 import stage from "./Scenes/scenes_index";
+import GroupMiddleware from "./Middlewares/group";
 
 config();
 
@@ -23,6 +24,7 @@ bot.use(session());
 bot.use(stage.middleware());
 bot.use(InitMiddleware);
 bot.use(AuthMiddleware);
+bot.use(GroupMiddleware)
 
 
 Base(bot);
