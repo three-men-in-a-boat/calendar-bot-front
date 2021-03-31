@@ -154,20 +154,28 @@ function createFullMdStr(event: Event, user_id?: number, user_name?: string) {
 function EventCard(ctx: CustomContext, event: Event, url: string) {
     let replyMdStr = createShortMdStr(event);
     let chatType = getChatType(ctx);
-    let id = getId(ctx);
-    let userName = getUserName(ctx);
+
 
     if (chatType === "group") {
+        let id = getId(ctx);
+        let userName = getUserName(ctx);
         replyMdStr = createShortMdStr(event, id, userName);
+        return ctx.reply(
+            replyMdStr,
+            {
+                parse_mode: 'HTML'
+            }
+        )
+    } else {
+        return ctx.reply(
+            replyMdStr,
+            {
+                parse_mode: 'HTML',
+                reply_markup: renderButtons(event.uid, url)
+            }
+        )
     }
 
-    return ctx.reply(
-        replyMdStr,
-        {
-            parse_mode: 'HTML',
-            reply_markup: renderButtons(event.uid, url)
-        }
-    )
 
 }
 
@@ -239,13 +247,13 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
                 let id = getId(ctx);
                 let userName = getUserName(ctx);
 
-                let str =  createShortMdStr(event);
+                let str = createShortMdStr(event);
                 if (chatType === "group") {
                     str = createShortMdStr(event, id, userName);
                 }
 
                 ctx.editMessageText(
-                   str,
+                    str,
                     {
                         parse_mode: 'HTML',
                         reply_markup: renderButtons(event.uid, data.p)
