@@ -2,7 +2,7 @@ import CustomContext from '../Models/CustomContext';
 import {Markup, Telegraf} from 'telegraf';
 import axios, {AxiosError} from "axios";
 import {EventCard} from "../utils/event_card";
-import Event from "../Models/Meeting";
+import Event from "../Models/Event";
 import getId from "../utils/getId";
 // @ts-ignore
 import Calendar from 'telegraf-calendar-telegram';

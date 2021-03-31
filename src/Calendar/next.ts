@@ -1,7 +1,7 @@
 import {Context, Telegraf} from "telegraf";
 import CustomContext from "../Models/CustomContext";
 import {AxiosError, default as axios} from "axios";
-import Event from "../Models/Meeting";
+import Event from "../Models/Event";
 import {EventCard} from "../utils/event_card";
 import getId from "../utils/getId";
 
@@ -18,7 +18,7 @@ function NextCallback(ctx: CustomContext) {
         })
 }
 
-export default function Next(bot: Telegraf<Context>) {
+export default function Next(bot: Telegraf<CustomContext>) {
 
     bot.command('next', ctx => {
         return NextCallback(ctx);

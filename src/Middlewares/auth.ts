@@ -1,9 +1,9 @@
 import axios from 'axios';
-import {Context} from 'telegraf';
+import CustomContext from "../Models/CustomContext";
 
 const whitelist = ['/start'];
 
-export default async function AuthMiddleware(ctx: Context, next: Function) {
+export default async function AuthMiddleware(ctx: CustomContext, next: Function) {
     if (ctx.from) {
         if (ctx.message) {
             // Поле text есть - в типах не описано
