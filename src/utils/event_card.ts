@@ -1,6 +1,6 @@
 import {Markup, Telegraf} from "telegraf";
 import CustomContext from "../Models/CustomContext";
-import Event from "../Models/Meeting";
+import Event from "../Models/Event";
 import axios, {AxiosError} from "axios";
 import moment from 'moment';
 
