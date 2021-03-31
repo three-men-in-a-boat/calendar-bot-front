@@ -3,6 +3,9 @@ import CustomContext from "../Models/CustomContext";
 import Event from "../Models/Event";
 import axios, {AxiosError} from "axios";
 import moment from 'moment';
+import getChatType from "./get_chat_type";
+import getId from "./getId";
+import getUserName from "./get_user_name";
 
 function renderButtons(id: string, url: string, extended: boolean = false, callLink: string | undefined = undefined) {
     if (!extended) {
@@ -80,25 +83,28 @@ function genHeader(event: Event) {
     return replyMdStr
 }
 
-function genFooter(event: Event) {
+function genFooter(event: Event, user_id?: number, user_name?: string) {
     let replyMdStr = ''
     replyMdStr += '-------------------------------------\n';
     replyMdStr += `🗓 Календарь <b>${event.calendar.title}</b>`
+    if (user_id && user_name) {
+        replyMdStr += ` пользователя <a href="tg://user?id=${user_id}">${user_name}</a>`
+    }
 
     return replyMdStr
 }
 
-function createShortMdStr(event: Event) {
+function createShortMdStr(event: Event, user_id?: number, user_name?: string) {
     let replyMdStr = genHeader(event);
 
     replyMdStr += '\n';
 
-    replyMdStr += genFooter(event);
+    replyMdStr += genFooter(event, user_id, user_name);
 
     return replyMdStr
 }
 
-function createFullMdStr(event: Event) {
+function createFullMdStr(event: Event, user_id?: number, user_name?: string) {
     let replyMdStr = genHeader(event);
 
     if (event.location?.description) {
@@ -140,13 +146,20 @@ function createFullMdStr(event: Event) {
     }
 
 
-    replyMdStr += genFooter(event);
+    replyMdStr += genFooter(event, user_id, user_name);
 
     return replyMdStr
 }
 
 function EventCard(ctx: CustomContext, event: Event, url: string) {
-    const replyMdStr = createShortMdStr(event);
+    let replyMdStr = createShortMdStr(event);
+    let chatType = getChatType(ctx);
+    let id = getId(ctx);
+    let userName = getUserName(ctx);
+
+    if (chatType === "group") {
+        replyMdStr = createShortMdStr(event, id, userName);
+    }
 
     return ctx.reply(
         replyMdStr,
@@ -178,8 +191,18 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
                 } else {
                     event = resp.data as Event;
                 }
+                //TODO тестировать что будет если ткнет другой пользователь
+                let chatType = getChatType(ctx);
+                let id = getId(ctx);
+                let userName = getUserName(ctx);
+
+                let str = createFullMdStr(event);
+                if (chatType === "group") {
+                    str = createFullMdStr(event, id, userName);
+                }
+
                 ctx.editMessageText(
-                    createFullMdStr(event),
+                    str,
                     {
                         parse_mode: 'HTML',
                         reply_markup: renderButtons(event.uid, data.p, true, event.call)
@@ -211,8 +234,18 @@ function EventCardHandler(bot: Telegraf<CustomContext>) {
                     event = resp.data as Event;
                 }
 
+
+                let chatType = getChatType(ctx);
+                let id = getId(ctx);
+                let userName = getUserName(ctx);
+
+                let str =  createShortMdStr(event);
+                if (chatType === "group") {
+                    str = createShortMdStr(event, id, userName);
+                }
+
                 ctx.editMessageText(
-                    createShortMdStr(event),
+                   str,
                     {
                         parse_mode: 'HTML',
                         reply_markup: renderButtons(event.uid, data.p)
