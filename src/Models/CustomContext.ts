@@ -3,7 +3,7 @@ import CreateEvent from "./CreateEvent";
 
 interface CreateEventData {
   created: boolean
-  curr_step: 'TITLE' | 'FROM' | 'TO' | 'DESC'
+  curr_step: 'TITLE' | 'FROM' | 'TO' | 'DESC' | 'DONE'
   event: CreateEvent
   mid: number,
   cid: number,
