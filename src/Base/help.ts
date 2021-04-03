@@ -2,8 +2,8 @@ import {Context, Markup, Telegraf} from 'telegraf';
 import CustomContext from "../Models/CustomContext";
 
 export default function Help(bot: Telegraf<CustomContext>) {
-    bot.help(ctx => {
-        ctx.reply(
+    bot.help((ctx:CustomContext) => {
+        return ctx.reply(
             'Это бот для работы с календарем. Сейчас доступны следующие команды',
             Markup.inlineKeyboard([
                 [

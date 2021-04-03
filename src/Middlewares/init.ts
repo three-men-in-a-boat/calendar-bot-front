@@ -1,17 +1,25 @@
 import CustomContext from "../Models/CustomContext";
+import redis from 'redis';
+import {uuid} from "uuidv4";
 
 export default async function InitMiddleware(ctx: CustomContext, next: Function) {
-    ctx.session_data ??= ''
-    ctx.scene.session.actionName ??= ''
+    if (!ctx.redis_client) {
+        const client = redis.createClient({db:10})
+        ctx.redis_client ??= client
+        ctx.scene.session.redis_client ??= client
+    }
+
     ctx.scene.session.create_event ??= {
         created: false,
         curr_step: 'TITLE',
         event: {
-            uid:new Date(Date.now()).toISOString(),
+            uid:uuid(),
             title: "",
             from: "",
             to: "",
-            description: ""
+            description: "",
+            fullDay: false,
+            attendees: []
         },
         mid: 0,
         cid: 0,
