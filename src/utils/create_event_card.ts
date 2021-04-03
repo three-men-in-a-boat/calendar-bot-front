@@ -8,7 +8,7 @@ function genEventReply(event: CreateEvent, name:string|undefined = undefined) {
     let retStr = `<b>${name ? name : 'Вы'} создали событие ${event.title}</b>\n\n`;
 
     retStr += '⏰ '
-    retStr += GetDatetimeHdTMLString(new Date(event.from), new Date(event.to));
+    retStr += GetDatetimeHTMLString(new Date(event.from), new Date(event.to));
 
     return retStr
 }
