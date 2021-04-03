@@ -1,9 +1,10 @@
 import {Context, Scenes} from 'telegraf';
 import CreateEvent from "./CreateEvent";
+import redis from 'redis';
 
 interface CreateEventData {
   created: boolean
-  curr_step: 'TITLE' | 'FROM' | 'TO' | 'DESC'
+  curr_step: 'TITLE' | 'FROM' | 'TO' | 'DESC' | 'DONE' | 'USERS'
   event: CreateEvent
   mid: number,
   cid: number,
@@ -11,12 +12,13 @@ interface CreateEventData {
 }
 
 interface SessionData extends Scenes.SceneSessionData{
-  actionName: string;
   create_event: CreateEventData
+  redis_client: redis.RedisClient
 }
 
 export default interface CustomContext extends Context {
-  session_data: string
+  actionName: string;
+  redis_client: redis.RedisClient;
 
   scene: Scenes.SceneContextScene<CustomContext, SessionData>
 }

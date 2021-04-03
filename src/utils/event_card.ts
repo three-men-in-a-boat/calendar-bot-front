@@ -6,6 +6,7 @@ import moment from 'moment';
 import getChatType from "./get_chat_type";
 import getId from "./getId";
 import getUserName from "./get_user_name";
+import GetDatetimeHTMLString from "./get_datetime_html_string";
 
 function renderButtons(id: string, url: string, extended: boolean = false, callLink: string | undefined = undefined) {
     if (!extended) {
@@ -60,24 +61,7 @@ function genHeader(event: Event) {
     if (event.fullDay) {
         replyMdStr += 'Весь день';
     } else {
-        if (from.getDate() === new Date().getDate()) {
-            replyMdStr += 'Cегодня'
-        } else if (from.getDate() === new Date().getDate() + 1) {
-            replyMdStr += 'Завтра'
-        } else if (from.getDate() === new Date().getDate() - 1) {
-            replyMdStr += 'Вчера'
-        } else {
-            replyMdStr += moment(event.from!).format('D MMMM YYYY')
-            if (from.getDay() !== to.getDay()) {
-                replyMdStr += ' - ' + moment(event.to!).format('D MMMM YYYY')
-            }
-        }
-
-        replyMdStr += ', <u>'
-        replyMdStr += moment(event.from!).format('LT')
-        replyMdStr += ' - ';
-        replyMdStr += moment(event.to!).format('LT')
-        replyMdStr += '</u>'
+        replyMdStr += GetDatetimeHTMLString(from, to);
     }
 
     return replyMdStr

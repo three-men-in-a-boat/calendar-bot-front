@@ -8,6 +8,7 @@ import Calendar from "./Calendar/calendar_index";
 import InitMiddleware from "./Middlewares/init";
 import stage from "./Scenes/scenes_index";
 import GroupMiddleware from "./Middlewares/group";
+import LocalSession from 'telegraf-session-local';
 
 config();
 
@@ -20,7 +21,8 @@ if (!token) {
 
 const bot = new Telegraf<CustomContext>(token);
 
-bot.use(session());
+bot.use((new LocalSession({ database: 'db.json' })).middleware())
+
 bot.use(stage.middleware());
 bot.use(InitMiddleware);
 bot.use(AuthMiddleware);
