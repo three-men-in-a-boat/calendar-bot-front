@@ -9,6 +9,7 @@ import axios, {AxiosError} from "axios";
 import CreateEventCard from "../utils/create_event_card";
 import getChatType from "../utils/get_chat_type";
 import {uuid} from 'uuidv4';
+import getMessageId from "../utils/get_message_id";
 
 const CreateEventScene = new Scenes.BaseScene<CustomContext>('create_event');
 
@@ -133,13 +134,15 @@ function genInlineKeyboard(event: CreateEvent, curr_step: string | undefined = u
     }
 }
 
-function genMessageText(event: CreateEvent, name: string | undefined = undefined, curr_step: string | undefined = undefined) {
+function genMessageText(ctx: CustomContext) {
     let retStr = '';
-    if (name) {
-        retStr += `${name} начинает создание события\n\n`;
+    if (getChatType(ctx) != 'private' && getUserName(ctx)) {
+        retStr += `${getUserName(ctx)} начинает создание события\n\n`;
     } else {
         retStr += 'Начинаем создавать событие\n\n'
     }
+
+    const event: CreateEvent = ctx.scene.session.create_event.event;
 
     if (!event.title) {
         retStr += "<b>Введите название события</b>"
@@ -157,7 +160,7 @@ function genMessageText(event: CreateEvent, name: string | undefined = undefined
                 })
             }
 
-            if (curr_step === 'USERS') {
+            if (ctx.scene.session.create_event.curr_step === 'USERS') {
                 retStr += '\n\n<b>Введите введите почту пользователя, которого хотите добавить</b>'
             } else {
                 retStr += '\n\n<b>Введите описание события</b>'
@@ -178,7 +181,7 @@ function genMessageText(event: CreateEvent, name: string | undefined = undefined
                         })
                     }
 
-                    if (curr_step === 'USERS') {
+                    if (ctx.scene.session.create_event.curr_step === 'USERS') {
                         retStr += '\n\n<b>Введите введите почту пользователя, которого хотите добавить</b>'
                     } else {
                         retStr += '\n\n<b>Введите описание события</b>'
@@ -192,7 +195,7 @@ function genMessageText(event: CreateEvent, name: string | undefined = undefined
         }
     }
 
-    if (name) {
+    if (getChatType(ctx) !== "private") {
         retStr += `\n\n<i>Только этот пользователь может взаимодействовать с этим сообщением.</i>`
     }
 
@@ -200,36 +203,17 @@ function genMessageText(event: CreateEvent, name: string | undefined = undefined
 }
 
 function genReply(ctx: CustomContext) {
-    if (getChatType(ctx) === 'group') {
-        return ctx.telegram.editMessageText(
-            ctx.scene.session.create_event.cid,
-            ctx.scene.session.create_event.mid,
-            undefined,
-            genMessageText(
+    return ctx.telegram.editMessageText(
+        ctx.scene.session.create_event.cid,
+        ctx.scene.session.create_event.mid,
+        undefined,
+        genMessageText(ctx), {
+            parse_mode: 'HTML',
+            reply_markup: genInlineKeyboard(
                 ctx.scene.session.create_event.event,
-                getUserName(ctx)
-                , ctx.scene.session.create_event.curr_step), {
-                parse_mode: 'HTML',
-                reply_markup: genInlineKeyboard(
-                    ctx.scene.session.create_event.event,
-                    ctx.scene.session.create_event.curr_step
-                )
-            })
-    } else {
-        return ctx.telegram.editMessageText(
-            ctx.scene.session.create_event.cid,
-            ctx.scene.session.create_event.mid,
-            undefined,
-            genMessageText(ctx.scene.session.create_event.event, undefined,
-                ctx.scene.session.create_event.curr_step), {
-                parse_mode: 'HTML',
-                reply_markup: genInlineKeyboard(
-                    ctx.scene.session.create_event.event,
-                    ctx.scene.session.create_event.curr_step
-                )
-            })
-    }
-
+                ctx.scene.session.create_event.curr_step
+            )
+        })
 
 }
 
@@ -239,8 +223,7 @@ CreateEventScene.enter(ctx => {
 
         ctx.telegram.sendMessage(
             ctx.scene.session.create_event.cid,
-            genMessageText(ctx.scene.session.create_event.event,
-                getChatType(ctx) === 'group' ? getUserName(ctx) : undefined),
+            genMessageText(ctx),
             {
                 parse_mode: 'HTML',
                 reply_markup: genInlineKeyboard(ctx.scene.session.create_event.event)
@@ -260,6 +243,23 @@ CreateEventScene.action('create_event_stop', ctx => {
 })
 
 CreateEventScene.on('text', async ctx => {
+    if (ctx.message.text[0] === '/') {
+        return ctx.telegram.sendMessage(
+            ctx.scene.session.create_event.cid,
+            "Нельзя пользоваться командами пока вы создаете событие. Отменить создание события?",
+            {
+                parse_mode: 'HTML',
+                reply_markup: {
+                    inline_keyboard: [
+                        [{
+                            text: 'Отменить создание события',
+                            callback_data: 'create_event_stop'
+                        }]
+                    ]
+                }
+            }
+        )
+    }
     switch (ctx.scene.session.create_event.curr_step) {
         case 'TITLE':
             ctx.scene.session.create_event.event.title = ctx.message.text;
@@ -292,6 +292,10 @@ CreateEventScene.on('text', async ctx => {
             })
             return genReply(ctx);
     }
+})
+
+CreateEventScene.on('message', async ctx => {
+
 })
 
 CreateEventScene.action(/create_event_add/, ctx => {
@@ -343,6 +347,15 @@ CreateEventScene.leave(ctx => {
     if (ctx.scene.session.create_event.created) {
         return CreateEventCard(ctx, ctx.scene.session.create_event.event.uid);
     } else {
+        if (getMessageId(ctx) && getMessageId(ctx) !== ctx.scene.session.create_event.mid) {
+            ctx.editMessageText('Создание события отменено. Повторите команду, которую вы хотели выполнить ' +
+                '(можно нажать на предыдущее сообщение)')
+            return ctx.telegram.editMessageText(
+                ctx.scene.session.create_event.cid,
+                ctx.scene.session.create_event.mid,
+                undefined,
+                'Отмена создания события');
+        }
         return ctx.editMessageText('Отмена создания события');
     }
 
