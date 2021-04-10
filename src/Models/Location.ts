@@ -1,4 +1,8 @@
 export default interface Location {
     description?: string,
-    geo?: Object
+    confrooms?: string[],
+    geo?: {
+        latitude: string,
+        longitude: string
+    }
 }

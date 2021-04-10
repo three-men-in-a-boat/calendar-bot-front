@@ -11,13 +11,13 @@ export default async function InitMiddleware(ctx: CustomContext, next: Function)
 
     ctx.scene.session.create_event ??= {
         created: false,
-        curr_step: 'TITLE',
+        curr: 'INIT',
         event: {
             uid:uuid(),
             title: "",
+            description: "",
             from: "",
             to: "",
-            description: "",
             fullDay: false,
             attendees: []
         },

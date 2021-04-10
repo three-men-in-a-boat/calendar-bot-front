@@ -2,234 +2,173 @@ import {Scenes} from "telegraf";
 import CustomContext from "../Models/CustomContext";
 import getUserName from "../utils/get_user_name";
 import getId from "../utils/getId";
-import CreateEvent from "../Models/CreateEvent";
-import moment from "moment";
-import parseDate from "../utils/parse_date";
+import {createFullHTMLStr, createShortHTMLStr} from "../Calendar/events/show_event_info";
 import axios, {AxiosError} from "axios";
-import CreateEventCard from "../utils/create_event_card";
+import CreateEventCard from "../Calendar/events/create_event_card";
 import getChatType from "../utils/get_chat_type";
 import {uuid} from 'uuidv4';
+import getMessageId from "../utils/get_message_id";
+import sendError from "../utils/send_error";
 
 const CreateEventScene = new Scenes.BaseScene<CustomContext>('create_event');
 
-function genInlineKeyboard(event: CreateEvent, curr_step: string | undefined = undefined) {
-    // if (event.title && !event.from && !event.fullDay) {
-    //     return {
-    //         inline_keyboard: [
-    //             [
-    //                 {
-    //                     text: 'Весь день',
-    //                     callback_data: 'create_event_fullday',
-    //                 }
-    //             ],
-    //             [
-    //                 {
-    //                     text: 'Отменить',
-    //                     callback_data: 'create_event_stop',
-    //                 }
-    //             ]
-    //         ],
-    //     }
-    // }
+function genInlineKeyboard(ctx: CustomContext) {
+    const inline_keyboard = [];
 
-    if (event.from && !event.to) {
-        return {
-            inline_keyboard: [
-                [
-                    {
-                        text: '30 минут', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 30
-                        })
-                    },
-                    {
-                        text: '1 час', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 60
-                        })
-                    },
-                ],
-                [
-                    {
-                        text: '2 часа', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 120
-                        })
-                    },
-                    {
-                        text: '4 часа', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 240
-                        })
-                    }
-                ],
-                [
-                    {
-                        text: 'Отменить',
-                        callback_data: 'create_event_stop',
-                    }
-                ]
-            ]
-        }
+    const curr = ctx.scene.session.create_event.curr;
+
+    if (curr === 'INIT') {
+        inline_keyboard.push([{
+            text: 'Отменить',
+            callback_data: 'create_event_stop'
+        }])
+
+        return {inline_keyboard};
     }
 
-    if (event.from && event.to || event.fullDay) {
-        if (curr_step === 'USERS') {
-            return {
-                inline_keyboard: [
-                    [
-                        {
-                            text: 'Создать событие',
-                            callback_data: 'create_event_create',
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Добавить описание',
-                            callback_data: 'create_event_desc_add'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Отменить',
-                            callback_data: 'create_event_stop',
-                        }
-                    ]
-                ],
-            }
-        } else {
-            return {
-                inline_keyboard: [
-                    [
-                        {
-                            text: 'Создать событие',
-                            callback_data: 'create_event_create',
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Добавить участников',
-                            callback_data: 'create_event_users_add'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Отменить',
-                            callback_data: 'create_event_stop',
-                        }
-                    ]
-                ],
-            }
-        }
-    }
-
-    return {
-        inline_keyboard: [[
+    if (curr === 'TO') {
+        inline_keyboard.push([
             {
-                text: 'Отменить',
-                callback_data: 'create_event_stop',
+                text: 'Весь день',
+                callback_data: 'create_event_fullday'
             }
-        ]],
+        ])
+        inline_keyboard.push([
+            {
+                text: '30 минут', callback_data: JSON.stringify({
+                    a: 'create_event_add',
+                    p: 30
+                })
+            },
+            {
+                text: '1 час', callback_data: JSON.stringify({
+                    a: 'create_event_add',
+                    p: 60
+                })
+            },
+        ]);
+        inline_keyboard.push(
+            [
+                {
+                    text: '2 часа', callback_data: JSON.stringify({
+                        a: 'create_event_add',
+                        p: 120
+                    })
+                },
+                {
+                    text: '4 часа', callback_data: JSON.stringify({
+                        a: 'create_event_add',
+                        p: 240
+                    })
+                }
+            ]);
+        inline_keyboard.push([{
+            text: 'Отменить',
+            callback_data: 'create_event_stop'
+        }])
+
+        return {inline_keyboard}
     }
+
+    inline_keyboard.push([{
+        text: 'Создать событие',
+        callback_data: 'create_event_create'
+    }])
+
+    if (curr !== 'TITLE') {
+        if (ctx.scene.session.create_event.event.title === 'Без названия') {
+            inline_keyboard.push([{
+                text: 'Добавить название',
+                callback_data: 'create_event_title_add'
+            }])
+        } else {
+            inline_keyboard.push([{
+                text: 'Изменить название',
+                callback_data: 'create_event_title_add'
+            }])
+        }
+    }
+    if (curr !== 'DESC') {
+        if (ctx.scene.session.create_event.event.description) {
+            inline_keyboard.push([{
+                text: 'Изменить описание',
+                callback_data: 'create_event_desc_add'
+            }])
+        } else {
+            inline_keyboard.push([{
+                text: 'Добавить описание',
+                callback_data: 'create_event_desc_add'
+            }])
+        }
+    }
+    if (curr !== 'USERS') {
+        inline_keyboard.push([{
+            text: 'Добавить пользователей',
+            callback_data: 'create_event_users_add'
+        }])
+    }
+
+    inline_keyboard.push([{
+        text: 'Отменить',
+        callback_data: 'create_event_stop'
+    }])
+
+    return {inline_keyboard}
 }
 
-function genMessageText(event: CreateEvent, name: string | undefined = undefined, curr_step: string | undefined = undefined) {
+function genMessageText(ctx: CustomContext) {
     let retStr = '';
-    if (name) {
-        retStr += `${name} начинает создание события\n\n`;
-    } else {
-        retStr += 'Начинаем создавать событие\n\n'
+    switch (ctx.scene.session.create_event.curr) {
+        case 'INIT':
+            retStr += '\n<b>Введите время события</b>:';
+            retStr += '\n\nНапример <pre>завтра в 12:00 </pre>или<pre> 22 марта</pre>';
+
+            if (getChatType(ctx) != 'private') {
+                retStr += `\nТолько ${getUserName(ctx)} может взаимодействовать с этим сообщением`;
+            }
+
+            break;
+        case 'TO':
+            retStr += `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
+            break;
+        case 'TITLE':
+            retStr += `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
+            break;
+        case 'DESC':
+            retStr += `\n<b>Введите описание события</b>`;
+            break;
+        case 'USERS':
+            retStr += `\n<b>Введите почту пользователя, которого хотите добавить</b>`;
+            break;
+
     }
 
-    if (!event.title) {
-        retStr += "<b>Введите название события</b>"
-    } else {
-        retStr += `<b>Название: </b> ${event.title}`
-        if (event.fullDay) {
-            retStr += '\n<b>Весь день</b>'
-            if (event.description) {
-                retStr += `\n<b>Описание:</b> ${event.description}`;
-            }
-            if (event.attendees.length > 0) {
-                retStr += '\n<b>Участники: </b>'
-                event.attendees.forEach(curr => {
-                    retStr += `\n${curr.email}`
-                })
-            }
 
-            if (curr_step === 'USERS') {
-                retStr += '\n\n<b>Введите введите почту пользователя, которого хотите добавить</b>'
-            } else {
-                retStr += '\n\n<b>Введите описание события</b>'
-            }
-        } else {
-            if (event.from) {
-                moment.locale('ru');
-                retStr += `\n<b>Время начала: </b> ${moment(event.from).format('LL')} в ${moment(event.from).format('LT')}`
-                if (event.to) {
-                    retStr += `\n<b>Время окончания: </b> ${moment(event.to).format('LL')} в ${moment(event.to).format('LT')}`
-                    if (event.description) {
-                        retStr += `\n<b>Описание:</b> ${event.description}`;
-                    }
-                    if (event.attendees.length > 0) {
-                        retStr += '\n<b>Участники: </b>'
-                        event.attendees.forEach(curr => {
-                            retStr += `\n${curr.email}`
-                        })
-                    }
-
-                    if (curr_step === 'USERS') {
-                        retStr += '\n\n<b>Введите введите почту пользователя, которого хотите добавить</b>'
-                    } else {
-                        retStr += '\n\n<b>Введите описание события</b>'
-                    }
-                } else {
-                    retStr += "\n\n<b>Выберите продолжительность события или введите дату и время окончания события в формате ДД.ММ.ГГГГ ЧЧ.ММ</b> (23.03.2021 18:00)"
-                }
-            } else {
-                retStr += "\n\n<b>Введите дату и время начала события в формате ДД.ММ.ГГГГ ЧЧ.ММ</b> (23.03.2021 18:00)"
-            }
-        }
+    if (ctx.scene.session.create_event.curr === 'INIT') {
+        return retStr;
     }
 
-    if (name) {
-        retStr += `\n\n<i>Только этот пользователь может взаимодействовать с этим сообщением.</i>`
+    const event = ctx.scene.session.create_event.event;
+
+    retStr += '\n\nСобытие:\n';
+    retStr += createFullHTMLStr(event)
+
+    if (getChatType(ctx) != 'private') {
+        retStr += `\nТолько ${getUserName(ctx)} может взаимодействовать с этим сообщением`;
     }
 
     return retStr
 }
 
 function genReply(ctx: CustomContext) {
-    if (getChatType(ctx) === 'group') {
-        return ctx.telegram.editMessageText(
-            ctx.scene.session.create_event.cid,
-            ctx.scene.session.create_event.mid,
-            undefined,
-            genMessageText(
-                ctx.scene.session.create_event.event,
-                getUserName(ctx)
-                , ctx.scene.session.create_event.curr_step), {
-                parse_mode: 'HTML',
-                reply_markup: genInlineKeyboard(
-                    ctx.scene.session.create_event.event,
-                    ctx.scene.session.create_event.curr_step
-                )
-            })
-    } else {
-        return ctx.telegram.editMessageText(
-            ctx.scene.session.create_event.cid,
-            ctx.scene.session.create_event.mid,
-            undefined,
-            genMessageText(ctx.scene.session.create_event.event, undefined,
-                ctx.scene.session.create_event.curr_step), {
-                parse_mode: 'HTML',
-                reply_markup: genInlineKeyboard(
-                    ctx.scene.session.create_event.event,
-                    ctx.scene.session.create_event.curr_step
-                )
-            })
-    }
-
+    return ctx.telegram.editMessageText(
+        ctx.scene.session.create_event.cid,
+        ctx.scene.session.create_event.mid,
+        undefined,
+        genMessageText(ctx), {
+            parse_mode: 'HTML',
+            reply_markup: genInlineKeyboard(ctx)
+        })
 
 }
 
@@ -239,11 +178,10 @@ CreateEventScene.enter(ctx => {
 
         ctx.telegram.sendMessage(
             ctx.scene.session.create_event.cid,
-            genMessageText(ctx.scene.session.create_event.event,
-                getChatType(ctx) === 'group' ? getUserName(ctx) : undefined),
+            genMessageText(ctx),
             {
                 parse_mode: 'HTML',
-                reply_markup: genInlineKeyboard(ctx.scene.session.create_event.event)
+                reply_markup: genInlineKeyboard(ctx)
             }
         ).then(m => {
             ctx.scene.session.create_event.mid = m.message_id;
@@ -260,26 +198,66 @@ CreateEventScene.action('create_event_stop', ctx => {
 })
 
 CreateEventScene.on('text', async ctx => {
-    switch (ctx.scene.session.create_event.curr_step) {
+    if (ctx.message.text[0] === '/') {
+        return ctx.telegram.sendMessage(
+            ctx.scene.session.create_event.cid,
+            "Нельзя пользоваться командами пока вы создаете событие. Отменить создание события?",
+            {
+                parse_mode: 'HTML',
+                reply_markup: {
+                    inline_keyboard: [
+                        [{
+                            text: 'Отменить создание события',
+                            callback_data: 'create_event_stop'
+                        }]
+                    ]
+                }
+            }
+        )
+    }
+    switch (ctx.scene.session.create_event.curr) {
+        case 'INIT':
+            axios.put(`${process.env['BACKEND_URL']}/parse/date`,
+                {text: ctx.message.text})
+                .then(async resp => {
+                    let event = ctx.scene.session.create_event.event;
+                    event.title = 'Без названия';
+                    if (resp.data.date) {
+                        event.from = new Date(resp.data.date).toISOString();
+                    } else {
+                        return sendError(ctx, 'Дата не распознана, попробуйте еще раз');
+                    }
+                    ctx.scene.session.create_event.curr = 'TO';
+                    if (ctx.scene.session.create_event.error_message_id !== 0) {
+                        ctx.telegram.deleteMessage(ctx.scene.session.create_event.cid,
+                            ctx.scene.session.create_event.error_message_id);
+                        ctx.scene.session.create_event.error_message_id = 0;
+                    }
+                    return genReply(ctx)
+                })
+            break;
         case 'TITLE':
             ctx.scene.session.create_event.event.title = ctx.message.text;
-            ctx.scene.session.create_event.curr_step = 'FROM'
             return genReply(ctx)
-        case 'FROM':
-            const date_from: Date | undefined = await parseDate(ctx, ctx.message.text)
-            if (date_from) {
-                ctx.scene.session.create_event.event.from = date_from.toISOString();
-                ctx.scene.session.create_event.curr_step = 'TO';
-                return genReply(ctx)
-            }
-            break;
         case 'TO':
-            const date_to: Date | undefined = await parseDate(ctx, ctx.message.text)
-            if (date_to) {
-                ctx.scene.session.create_event.event.from = date_to.toISOString();
-                ctx.scene.session.create_event.curr_step = 'DESC';
-                return genReply(ctx)
-            }
+            axios.put(`${process.env['BACKEND_URL']}/parse/date`,
+                {text: ctx.message.text})
+                .then(async resp => {
+                    let event = ctx.scene.session.create_event.event;
+                    if (resp.data.date) {
+                        event.to = new Date(resp.data.date).toISOString();
+                    } else {
+                        return sendError(ctx, 'Дата не распознана, попробуйте еще раз');
+                    }
+                    ctx.scene.session.create_event.curr = 'TITLE';
+                    if (ctx.scene.session.create_event.error_message_id !== 0) {
+                        ctx.telegram.deleteMessage(ctx.scene.session.create_event.cid,
+                            ctx.scene.session.create_event.error_message_id);
+                        ctx.scene.session.create_event.error_message_id = 0;
+                    }
+                    return genReply(ctx)
+                })
+
             break;
         case 'DESC':
             ctx.scene.session.create_event.event.description = ctx.message.text;
@@ -299,7 +277,7 @@ CreateEventScene.action(/create_event_add/, ctx => {
     let dateTo = new Date(ctx.scene.session.create_event.event.from!)
     dateTo.setMinutes(dateTo.getMinutes() + data.p)
     ctx.scene.session.create_event.event.to = dateTo.toISOString();
-    ctx.scene.session.create_event.curr_step = 'DESC';
+    ctx.scene.session.create_event.curr = 'DESC';
     return genReply(ctx);
 })
 
@@ -325,17 +303,22 @@ CreateEventScene.action('create_event_create', ctx => {
 
 CreateEventScene.action('create_event_fullday', ctx => {
     ctx.scene.session.create_event.event.fullDay = true;
-    ctx.scene.session.create_event.curr_step = 'DESC';
+    ctx.scene.session.create_event.curr = 'DESC';
     return genReply(ctx);
 })
 
 CreateEventScene.action('create_event_users_add', ctx => {
-    ctx.scene.session.create_event.curr_step = 'USERS';
+    ctx.scene.session.create_event.curr = 'USERS';
+    return genReply(ctx);
+})
+
+CreateEventScene.action('create_event_title_add', ctx => {
+    ctx.scene.session.create_event.curr = 'TITLE';
     return genReply(ctx);
 })
 
 CreateEventScene.action('create_event_desc_add', ctx => {
-    ctx.scene.session.create_event.curr_step = 'DESC';
+    ctx.scene.session.create_event.curr = 'DESC';
     return genReply(ctx);
 })
 
@@ -343,9 +326,39 @@ CreateEventScene.leave(ctx => {
     if (ctx.scene.session.create_event.created) {
         return CreateEventCard(ctx, ctx.scene.session.create_event.event.uid);
     } else {
+        if (getMessageId(ctx) && getMessageId(ctx) !== ctx.scene.session.create_event.mid) {
+            ctx.editMessageText('Создание события отменено. Повторите команду, которую вы хотели выполнить ' +
+                '(можно нажать на предыдущее сообщение)')
+            return ctx.telegram.editMessageText(
+                ctx.scene.session.create_event.cid,
+                ctx.scene.session.create_event.mid,
+                undefined,
+                'Отмена создания события');
+        }
         return ctx.editMessageText('Отмена создания события');
     }
 
+})
+
+CreateEventScene.on('message', async ctx => {
+    ctx.telegram.sendMessage(
+        ctx.scene.session.create_event.cid,
+        "Отменить создание события?",
+        {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: [
+                    [{
+                        text: 'Да',
+                        callback_data: 'create_event_stop'
+                    }]
+                ]
+            }
+        }
+    )
+        .then(m => {
+            ctx.scene.session.create_event.error_message_id = m.message_id
+        })
 })
 
 export default CreateEventScene
