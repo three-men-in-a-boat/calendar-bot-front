@@ -303,6 +303,8 @@ CreateEventScene.action('create_event_create', ctx => {
 
 CreateEventScene.action('create_event_fullday', ctx => {
     ctx.scene.session.create_event.event.fullDay = true;
+    let date_from = new Date(ctx.scene.session.create_event.event.from!);
+    ctx.scene.session.create_event.event.to = new Date(date_from.setHours(date_from.getHours() + 2)).toISOString()
     ctx.scene.session.create_event.curr = 'TITLE';
     return genReply(ctx);
 })
