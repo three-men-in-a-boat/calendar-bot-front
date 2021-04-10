@@ -84,10 +84,10 @@ function createFullHTMLStr(event: Event, user_id?: number, user_name?: string) {
             } else {
                 if (user.status === 'ACCEPTED') {
                     replyMdStr += ' ✅'
-                } else if (user.status === 'NEEDS_ACTION') {
-                    replyMdStr += ' �'
-                } else {
+                } else if (user.status === 'DECLINED') {
                     replyMdStr += ' ❌'
+                } else {
+                    replyMdStr += ' �'
                 }
             }
         }

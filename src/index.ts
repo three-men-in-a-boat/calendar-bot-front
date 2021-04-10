@@ -29,9 +29,10 @@ bot.use(AuthMiddleware);
 bot.use(GroupMiddleware)
 
 
-Base(bot);
+
 Calendar(bot)
 EventCardHandler(bot);
+Base(bot);
 
 bot
   .launch()
