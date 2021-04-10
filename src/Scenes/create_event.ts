@@ -132,7 +132,7 @@ function genMessageText(ctx: CustomContext) {
             retStr += `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
             break;
         case 'TITLE':
-            retStr += `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
+            retStr += `\n<b>Введите название события</b>`;
             break;
         case 'DESC':
             retStr += `\n<b>Введите описание события</b>`;
@@ -304,7 +304,7 @@ CreateEventScene.action('create_event_create', ctx => {
 CreateEventScene.action('create_event_fullday', ctx => {
     ctx.scene.session.create_event.event.fullDay = true;
     let date_from = new Date(ctx.scene.session.create_event.event.from!);
-    ctx.scene.session.create_event.event.to = new Date(date_from.setHours(date_from.getHours() + 2)).toISOString()
+    ctx.scene.session.create_event.event.to = new Date(date_from.setDate(date_from.getDate() + 1)).toISOString()
     ctx.scene.session.create_event.curr = 'TITLE';
     return genReply(ctx);
 })
