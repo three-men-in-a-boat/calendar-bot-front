@@ -1,8 +1,8 @@
 import {Telegraf} from "telegraf";
-import CustomContext from "../Models/CustomContext";
+import CustomContext from "../../Models/CustomContext";
 import axios from "axios";
-import getId from "../utils/getId";
-import getUserName from "../utils/get_user_name";
+import getId from "../../utils/getId";
+import getUserName from "../../utils/get_user_name";
 
 export default function EventHandlers(bot: Telegraf<CustomContext>) {
     bot.action(/event_user_accept/, ctx => {

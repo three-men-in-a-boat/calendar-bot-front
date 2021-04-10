@@ -4,7 +4,7 @@ import SelectedDate from './selected_date';
 import CustomContext from '../Models/CustomContext';
 import Next from "./next";
 import CreateEvent from "./create_event";
-import EventHandlers from "./event_handlers";
+import EventHandlers from "./events/event_handlers";
 
 export default function Calendar(bot: Telegraf<CustomContext>) {
   Today(bot);

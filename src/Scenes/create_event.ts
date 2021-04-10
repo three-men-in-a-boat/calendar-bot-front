@@ -2,18 +2,31 @@ import {Scenes} from "telegraf";
 import CustomContext from "../Models/CustomContext";
 import getUserName from "../utils/get_user_name";
 import getId from "../utils/getId";
-import CreateEvent from "../Models/CreateEvent";
-import moment from "moment";
-import parseDate from "../utils/parse_date";
+import {createFullHTMLStr, createShortHTMLStr} from "../Calendar/events/show_event_info";
 import axios, {AxiosError} from "axios";
-import CreateEventCard from "../utils/create_event_card";
+import CreateEventCard from "../Calendar/events/create_event_card";
 import getChatType from "../utils/get_chat_type";
 import {uuid} from 'uuidv4';
 import getMessageId from "../utils/get_message_id";
+import sendError from "../utils/send_error";
 
 const CreateEventScene = new Scenes.BaseScene<CustomContext>('create_event');
 
-function genInlineKeyboard(event: CreateEvent, curr_step: string | undefined = undefined) {
+function genInlineKeyboard(ctx: CustomContext) {
+    const inline_keyboard = [];
+
+    switch (ctx.scene.session.create_event.curr){
+        case 'INIT':
+            break;
+    }
+
+    inline_keyboard.push([{
+        text: 'Отменить',
+        callback_data: 'create_event_stop'
+    }])
+
+    return {inline_keyboard}
+
     // if (event.title && !event.from && !event.fullDay) {
     //     return {
     //         inline_keyboard: [
@@ -32,171 +45,136 @@ function genInlineKeyboard(event: CreateEvent, curr_step: string | undefined = u
     //         ],
     //     }
     // }
-
-    if (event.from && !event.to) {
-        return {
-            inline_keyboard: [
-                [
-                    {
-                        text: '30 минут', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 30
-                        })
-                    },
-                    {
-                        text: '1 час', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 60
-                        })
-                    },
-                ],
-                [
-                    {
-                        text: '2 часа', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 120
-                        })
-                    },
-                    {
-                        text: '4 часа', callback_data: JSON.stringify({
-                            a: 'create_event_add',
-                            p: 240
-                        })
-                    }
-                ],
-                [
-                    {
-                        text: 'Отменить',
-                        callback_data: 'create_event_stop',
-                    }
-                ]
-            ]
-        }
-    }
-
-    if (event.from && event.to || event.fullDay) {
-        if (curr_step === 'USERS') {
-            return {
-                inline_keyboard: [
-                    [
-                        {
-                            text: 'Создать событие',
-                            callback_data: 'create_event_create',
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Добавить описание',
-                            callback_data: 'create_event_desc_add'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Отменить',
-                            callback_data: 'create_event_stop',
-                        }
-                    ]
-                ],
-            }
-        } else {
-            return {
-                inline_keyboard: [
-                    [
-                        {
-                            text: 'Создать событие',
-                            callback_data: 'create_event_create',
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Добавить участников',
-                            callback_data: 'create_event_users_add'
-                        }
-                    ],
-                    [
-                        {
-                            text: 'Отменить',
-                            callback_data: 'create_event_stop',
-                        }
-                    ]
-                ],
-            }
-        }
-    }
-
-    return {
-        inline_keyboard: [[
-            {
-                text: 'Отменить',
-                callback_data: 'create_event_stop',
-            }
-        ]],
-    }
+    // if (event.from && !event.to) {
+    //     return {
+    //         inline_keyboard: [
+    //             [
+    //                 {
+    //                     text: '30 минут', callback_data: JSON.stringify({
+    //                         a: 'create_event_add',
+    //                         p: 30
+    //                     })
+    //                 },
+    //                 {
+    //                     text: '1 час', callback_data: JSON.stringify({
+    //                         a: 'create_event_add',
+    //                         p: 60
+    //                     })
+    //                 },
+    //             ],
+    //             [
+    //                 {
+    //                     text: '2 часа', callback_data: JSON.stringify({
+    //                         a: 'create_event_add',
+    //                         p: 120
+    //                     })
+    //                 },
+    //                 {
+    //                     text: '4 часа', callback_data: JSON.stringify({
+    //                         a: 'create_event_add',
+    //                         p: 240
+    //                     })
+    //                 }
+    //             ],
+    //             [
+    //                 {
+    //                     text: 'Отменить',
+    //                     callback_data: 'create_event_stop',
+    //                 }
+    //             ]
+    //         ]
+    //     }
+    // }
+    //
+    // if (event.from && event.to || event.fullDay) {
+    //     if (curr === 'USERS') {
+    //         return {
+    //             inline_keyboard: [
+    //                 [
+    //                     {
+    //                         text: 'Создать событие',
+    //                         callback_data: 'create_event_create',
+    //                     }
+    //                 ],
+    //                 [
+    //                     {
+    //                         text: 'Добавить описание',
+    //                         callback_data: 'create_event_desc_add'
+    //                     }
+    //                 ],
+    //                 [
+    //                     {
+    //                         text: 'Отменить',
+    //                         callback_data: 'create_event_stop',
+    //                     }
+    //                 ]
+    //             ],
+    //         }
+    //     } else {
+    //         return {
+    //             inline_keyboard: [
+    //                 [
+    //                     {
+    //                         text: 'Создать событие',
+    //                         callback_data: 'create_event_create',
+    //                     }
+    //                 ],
+    //                 [
+    //                     {
+    //                         text: 'Добавить участников',
+    //                         callback_data: 'create_event_users_add'
+    //                     }
+    //                 ],
+    //                 [
+    //                     {
+    //                         text: 'Отменить',
+    //                         callback_data: 'create_event_stop',
+    //                     }
+    //                 ]
+    //             ],
+    //         }
+    //     }
+    // }
+    //
+    // return {
+    //     inline_keyboard: [[
+    //         {
+    //             text: 'Отменить',
+    //             callback_data: 'create_event_stop',
+    //         }
+    //     ]],
+    // }
 }
 
 function genMessageText(ctx: CustomContext) {
     let retStr = '';
-    if (getChatType(ctx) != 'private' && getUserName(ctx)) {
-        retStr += `${getUserName(ctx)} начинает создание события\n\n`;
-    } else {
-        retStr += 'Начинаем создавать событие\n\n'
+    switch (ctx.scene.session.create_event.curr) {
+        case 'INIT':
+            retStr += '\n<b>Введите время события</b>:';
+            retStr += '\n\nНапример <pre>завтра в 12:00 </pre>или<pre> 22 марта</pre>';
+
+            if (getChatType(ctx) != 'private') {
+                retStr += `\nТолько ${getUserName(ctx)} может взаимодействовать с этим сообщением`;
+            }
+
+            break;
+        case 'TO':
+            retStr +=  `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
+
     }
 
-    const event: CreateEvent = ctx.scene.session.create_event.event;
 
-    if (!event.title) {
-        retStr += "<b>Введите название события</b>"
-    } else {
-        retStr += `<b>Название: </b> ${event.title}`
-        if (event.fullDay) {
-            retStr += '\n<b>Весь день</b>'
-            if (event.description) {
-                retStr += `\n<b>Описание:</b> ${event.description}`;
-            }
-            if (event.attendees.length > 0) {
-                retStr += '\n<b>Участники: </b>'
-                event.attendees.forEach(curr => {
-                    retStr += `\n${curr.email}`
-                })
-            }
-
-            if (ctx.scene.session.create_event.curr_step === 'USERS') {
-                retStr += '\n\n<b>Введите введите почту пользователя, которого хотите добавить</b>'
-            } else {
-                retStr += '\n\n<b>Введите описание события</b>'
-            }
-        } else {
-            if (event.from) {
-                moment.locale('ru');
-                retStr += `\n<b>Время начала: </b> ${moment(event.from).format('LL')} в ${moment(event.from).format('LT')}`
-                if (event.to) {
-                    retStr += `\n<b>Время окончания: </b> ${moment(event.to).format('LL')} в ${moment(event.to).format('LT')}`
-                    if (event.description) {
-                        retStr += `\n<b>Описание:</b> ${event.description}`;
-                    }
-                    if (event.attendees.length > 0) {
-                        retStr += '\n<b>Участники: </b>'
-                        event.attendees.forEach(curr => {
-                            retStr += `\n${curr.email}`
-                        })
-                    }
-
-                    if (ctx.scene.session.create_event.curr_step === 'USERS') {
-                        retStr += '\n\n<b>Введите введите почту пользователя, которого хотите добавить</b>'
-                    } else {
-                        retStr += '\n\n<b>Введите описание события</b>'
-                    }
-                } else {
-                    retStr += "\n\n<b>Выберите продолжительность события или введите дату и время окончания события в формате ДД.ММ.ГГГГ ЧЧ.ММ</b> (23.03.2021 18:00)"
-                }
-            } else {
-                retStr += "\n\n<b>Введите дату и время начала события в формате ДД.ММ.ГГГГ ЧЧ.ММ</b> (23.03.2021 18:00)"
-            }
-        }
+    if (ctx.scene.session.create_event.curr === 'INIT') {
+        return retStr;
     }
 
-    if (getChatType(ctx) !== "private") {
-        retStr += `\n\n<i>Только этот пользователь может взаимодействовать с этим сообщением.</i>`
+    const event = ctx.scene.session.create_event.event;
+
+    retStr += '\n\nСобытие:\n';
+    retStr += createFullHTMLStr(event)
+
+    if (getChatType(ctx) != 'private') {
+        retStr += `\nТолько ${getUserName(ctx)} может взаимодействовать с этим сообщением`;
     }
 
     return retStr
@@ -209,10 +187,7 @@ function genReply(ctx: CustomContext) {
         undefined,
         genMessageText(ctx), {
             parse_mode: 'HTML',
-            reply_markup: genInlineKeyboard(
-                ctx.scene.session.create_event.event,
-                ctx.scene.session.create_event.curr_step
-            )
+            reply_markup: genInlineKeyboard(ctx)
         })
 
 }
@@ -226,7 +201,7 @@ CreateEventScene.enter(ctx => {
             genMessageText(ctx),
             {
                 parse_mode: 'HTML',
-                reply_markup: genInlineKeyboard(ctx.scene.session.create_event.event)
+                reply_markup: genInlineKeyboard(ctx)
             }
         ).then(m => {
             ctx.scene.session.create_event.mid = m.message_id;
@@ -260,26 +235,40 @@ CreateEventScene.on('text', async ctx => {
             }
         )
     }
-    switch (ctx.scene.session.create_event.curr_step) {
+    switch (ctx.scene.session.create_event.curr) {
+        case 'INIT':
+            axios.put(`${process.env['BACKEND_URL']}/parse/date`,
+                {text: ctx.message.text})
+                .then(async resp => {
+                    let event = ctx.scene.session.create_event.event;
+                    event.title = 'Без названия';
+                    if (resp.data.date) {
+                        event.from = resp.data.date;
+                    } else {
+                        return sendError(ctx, 'Дата не распознана, попробуйте еще раз');
+                    }
+                    ctx.scene.session.create_event.curr = 'TO';
+                    if (ctx.scene.session.create_event.error_message_id !== 0) {
+                        ctx.telegram.deleteMessage(ctx.scene.session.create_event.cid,
+                            ctx.scene.session.create_event.error_message_id);
+                        ctx.scene.session.create_event.error_message_id = 0;
+                    }
+                    return genReply(ctx)
+                })
+                .catch((err: AxiosError) => {
+                    console.log(`Create init error: ${err.message}`);
+                })
+            break;
         case 'TITLE':
             ctx.scene.session.create_event.event.title = ctx.message.text;
-            ctx.scene.session.create_event.curr_step = 'FROM'
+            ctx.scene.session.create_event.curr = 'FROM'
             return genReply(ctx)
         case 'FROM':
-            const date_from: Date | undefined = await parseDate(ctx, ctx.message.text)
-            if (date_from) {
-                ctx.scene.session.create_event.event.from = date_from.toISOString();
-                ctx.scene.session.create_event.curr_step = 'TO';
-                return genReply(ctx)
-            }
+
+
             break;
         case 'TO':
-            const date_to: Date | undefined = await parseDate(ctx, ctx.message.text)
-            if (date_to) {
-                ctx.scene.session.create_event.event.from = date_to.toISOString();
-                ctx.scene.session.create_event.curr_step = 'DESC';
-                return genReply(ctx)
-            }
+
             break;
         case 'DESC':
             ctx.scene.session.create_event.event.description = ctx.message.text;
@@ -294,16 +283,12 @@ CreateEventScene.on('text', async ctx => {
     }
 })
 
-CreateEventScene.on('message', async ctx => {
-
-})
-
 CreateEventScene.action(/create_event_add/, ctx => {
     const data = JSON.parse(ctx.match.input)
     let dateTo = new Date(ctx.scene.session.create_event.event.from!)
     dateTo.setMinutes(dateTo.getMinutes() + data.p)
     ctx.scene.session.create_event.event.to = dateTo.toISOString();
-    ctx.scene.session.create_event.curr_step = 'DESC';
+    ctx.scene.session.create_event.curr = 'DESC';
     return genReply(ctx);
 })
 
@@ -329,17 +314,17 @@ CreateEventScene.action('create_event_create', ctx => {
 
 CreateEventScene.action('create_event_fullday', ctx => {
     ctx.scene.session.create_event.event.fullDay = true;
-    ctx.scene.session.create_event.curr_step = 'DESC';
+    ctx.scene.session.create_event.curr = 'DESC';
     return genReply(ctx);
 })
 
 CreateEventScene.action('create_event_users_add', ctx => {
-    ctx.scene.session.create_event.curr_step = 'USERS';
+    ctx.scene.session.create_event.curr = 'USERS';
     return genReply(ctx);
 })
 
 CreateEventScene.action('create_event_desc_add', ctx => {
-    ctx.scene.session.create_event.curr_step = 'DESC';
+    ctx.scene.session.create_event.curr = 'DESC';
     return genReply(ctx);
 })
 
@@ -359,6 +344,27 @@ CreateEventScene.leave(ctx => {
         return ctx.editMessageText('Отмена создания события');
     }
 
+})
+
+CreateEventScene.on('message', async ctx => {
+    ctx.telegram.sendMessage(
+        ctx.scene.session.create_event.cid,
+        "Отменить создание события?",
+        {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: [
+                    [{
+                        text: 'Да',
+                        callback_data: 'create_event_stop'
+                    }]
+                ]
+            }
+        }
+    )
+        .then(m => {
+            ctx.scene.session.create_event.error_message_id = m.message_id
+        })
 })
 
 export default CreateEventScene

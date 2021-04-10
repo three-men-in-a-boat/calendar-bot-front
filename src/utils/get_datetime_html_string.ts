@@ -1,6 +1,6 @@
 import moment from "moment";
 
-export default function GetDatetimeHTMLString(from: Date, to: Date) {
+export default function GetDatetimeHTMLString(from: Date, to?: Date) {
 
     let retStr = ''
 
@@ -12,15 +12,19 @@ export default function GetDatetimeHTMLString(from: Date, to: Date) {
         retStr += 'Вчера'
     } else {
         retStr += moment(from.toISOString()).format('D MMMM YYYY')
-        if (from.getDay() !== to.getDay()) {
-            retStr += ' - ' + moment(to.toISOString()).format('D MMMM YYYY')
+        if (to) {
+            if (from.getDay() !== to.getDay()) {
+                retStr += ' - ' + moment(to.toISOString()).format('D MMMM YYYY')
+            }
         }
     }
 
     retStr += ', <u>'
     retStr += moment(from.toISOString()).format('LT')
-    retStr += ' - ';
-    retStr += moment(to.toISOString()).format('LT')
+    if (to) {
+        retStr += ' - ';
+        retStr += moment(to.toISOString()).format('LT')
+    }
     retStr += '</u>'
 
     return retStr

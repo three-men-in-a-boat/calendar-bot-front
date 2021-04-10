@@ -1,11 +1,11 @@
 import {Context, Scenes} from 'telegraf';
-import CreateEvent from "./CreateEvent";
 import redis from 'redis';
+import Event from "./Event";
 
 interface CreateEventData {
   created: boolean
-  curr_step: 'TITLE' | 'FROM' | 'TO' | 'DESC' | 'DONE' | 'USERS'
-  event: CreateEvent
+  curr: 'INIT' | 'TITLE' | 'FROM' | 'TO' | 'DESC' | 'DONE' | 'USERS'
+  event: Event
   mid: number,
   cid: number,
   error_message_id: number
