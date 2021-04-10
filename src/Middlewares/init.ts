@@ -15,9 +15,9 @@ export default async function InitMiddleware(ctx: CustomContext, next: Function)
         event: {
             uid:uuid(),
             title: "",
+            description: "",
             from: "",
             to: "",
-            description: "",
             fullDay: false,
             attendees: []
         },

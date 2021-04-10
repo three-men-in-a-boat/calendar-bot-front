@@ -11,7 +11,7 @@ function genEventReply(event: Event, name: string | undefined = undefined) {
     if (event.fullDay) {
         retStr += 'Весь день\n'
     } else {
-        retStr += GetDatetimeHTMLString(new Date(event.from!), new Date(event.to!));
+        retStr += GetDatetimeHTMLString(new Date(event.from!), false, new Date(event.to!));
     }
 
     return retStr

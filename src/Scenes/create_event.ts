@@ -15,9 +15,97 @@ const CreateEventScene = new Scenes.BaseScene<CustomContext>('create_event');
 function genInlineKeyboard(ctx: CustomContext) {
     const inline_keyboard = [];
 
-    switch (ctx.scene.session.create_event.curr){
-        case 'INIT':
-            break;
+    const curr = ctx.scene.session.create_event.curr;
+
+    if (curr === 'INIT') {
+        inline_keyboard.push([{
+            text: 'Отменить',
+            callback_data: 'create_event_stop'
+        }])
+
+        return {inline_keyboard};
+    }
+
+    if (curr === 'TO') {
+        inline_keyboard.push([
+            {
+                text: 'Весь день',
+                callback_data: 'create_event_fullday'
+            }
+        ])
+        inline_keyboard.push([
+            {
+                text: '30 минут', callback_data: JSON.stringify({
+                    a: 'create_event_add',
+                    p: 30
+                })
+            },
+            {
+                text: '1 час', callback_data: JSON.stringify({
+                    a: 'create_event_add',
+                    p: 60
+                })
+            },
+        ]);
+        inline_keyboard.push(
+            [
+                {
+                    text: '2 часа', callback_data: JSON.stringify({
+                        a: 'create_event_add',
+                        p: 120
+                    })
+                },
+                {
+                    text: '4 часа', callback_data: JSON.stringify({
+                        a: 'create_event_add',
+                        p: 240
+                    })
+                }
+            ]);
+        inline_keyboard.push([{
+            text: 'Отменить',
+            callback_data: 'create_event_stop'
+        }])
+
+        return {inline_keyboard}
+    }
+
+    inline_keyboard.push([{
+        text: 'Создать событие',
+        callback_data: 'create_event_create'
+    }])
+
+    if (curr !== 'TITLE') {
+        if (ctx.scene.session.create_event.event.title === 'Без названия') {
+            inline_keyboard.push([{
+                text: 'Добавить название',
+                callback_data: 'create_event_title_add'
+            }])
+        } else {
+            inline_keyboard.push([{
+                text: 'Изменить название',
+                callback_data: 'create_event_title_add'
+            }])
+        }
+    }
+    if (curr !== 'DESC') {
+        if (ctx.scene.session.create_event.event.description) {
+            inline_keyboard.push([{
+                text: 'Изменить описание',
+                callback_data: 'create_event_desc_add'
+            }])
+        } else {
+            inline_keyboard.push([{
+                text: 'Добавить описание',
+                callback_data: 'create_event_desc_add'
+            }])
+        }
+    }
+    if (curr !== 'USERS') {
+        inline_keyboard.push([{
+            text: 'Добавить пользователей',
+            callback_data: 'create_event_users_add'
+        }])
     }
 
     inline_keyboard.push([{
@@ -26,124 +114,6 @@ function genInlineKeyboard(ctx: CustomContext) {
     }])
 
     return {inline_keyboard}
-
-    // if (event.title && !event.from && !event.fullDay) {
-    //     return {
-    //         inline_keyboard: [
-    //             [
-    //                 {
-    //                     text: 'Весь день',
-    //                     callback_data: 'create_event_fullday',
-    //                 }
-    //             ],
-    //             [
-    //                 {
-    //                     text: 'Отменить',
-    //                     callback_data: 'create_event_stop',
-    //                 }
-    //             ]
-    //         ],
-    //     }
-    // }
-    // if (event.from && !event.to) {
-    //     return {
-    //         inline_keyboard: [
-    //             [
-    //                 {
-    //                     text: '30 минут', callback_data: JSON.stringify({
-    //                         a: 'create_event_add',
-    //                         p: 30
-    //                     })
-    //                 },
-    //                 {
-    //                     text: '1 час', callback_data: JSON.stringify({
-    //                         a: 'create_event_add',
-    //                         p: 60
-    //                     })
-    //                 },
-    //             ],
-    //             [
-    //                 {
-    //                     text: '2 часа', callback_data: JSON.stringify({
-    //                         a: 'create_event_add',
-    //                         p: 120
-    //                     })
-    //                 },
-    //                 {
-    //                     text: '4 часа', callback_data: JSON.stringify({
-    //                         a: 'create_event_add',
-    //                         p: 240
-    //                     })
-    //                 }
-    //             ],
-    //             [
-    //                 {
-    //                     text: 'Отменить',
-    //                     callback_data: 'create_event_stop',
-    //                 }
-    //             ]
-    //         ]
-    //     }
-    // }
-    //
-    // if (event.from && event.to || event.fullDay) {
-    //     if (curr === 'USERS') {
-    //         return {
-    //             inline_keyboard: [
-    //                 [
-    //                     {
-    //                         text: 'Создать событие',
-    //                         callback_data: 'create_event_create',
-    //                     }
-    //                 ],
-    //                 [
-    //                     {
-    //                         text: 'Добавить описание',
-    //                         callback_data: 'create_event_desc_add'
-    //                     }
-    //                 ],
-    //                 [
-    //                     {
-    //                         text: 'Отменить',
-    //                         callback_data: 'create_event_stop',
-    //                     }
-    //                 ]
-    //             ],
-    //         }
-    //     } else {
-    //         return {
-    //             inline_keyboard: [
-    //                 [
-    //                     {
-    //                         text: 'Создать событие',
-    //                         callback_data: 'create_event_create',
-    //                     }
-    //                 ],
-    //                 [
-    //                     {
-    //                         text: 'Добавить участников',
-    //                         callback_data: 'create_event_users_add'
-    //                     }
-    //                 ],
-    //                 [
-    //                     {
-    //                         text: 'Отменить',
-    //                         callback_data: 'create_event_stop',
-    //                     }
-    //                 ]
-    //             ],
-    //         }
-    //     }
-    // }
-    //
-    // return {
-    //     inline_keyboard: [[
-    //         {
-    //             text: 'Отменить',
-    //             callback_data: 'create_event_stop',
-    //         }
-    //     ]],
-    // }
 }
 
 function genMessageText(ctx: CustomContext) {
@@ -159,7 +129,17 @@ function genMessageText(ctx: CustomContext) {
 
             break;
         case 'TO':
-            retStr +=  `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
+            retStr += `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
+            break;
+        case 'TITLE':
+            retStr += `\n<b>Выберите продолжительность события или введите время окончания события</b>`;
+            break;
+        case 'DESC':
+            retStr += `\n<b>Введите описание события</b>`;
+            break;
+        case 'USERS':
+            retStr += `\n<b>Введите почту пользователя, которого хотите добавить</b>`;
+            break;
 
     }
 
@@ -243,7 +223,7 @@ CreateEventScene.on('text', async ctx => {
                     let event = ctx.scene.session.create_event.event;
                     event.title = 'Без названия';
                     if (resp.data.date) {
-                        event.from = resp.data.date;
+                        event.from = new Date(resp.data.date).toISOString();
                     } else {
                         return sendError(ctx, 'Дата не распознана, попробуйте еще раз');
                     }
@@ -255,19 +235,28 @@ CreateEventScene.on('text', async ctx => {
                     }
                     return genReply(ctx)
                 })
-                .catch((err: AxiosError) => {
-                    console.log(`Create init error: ${err.message}`);
-                })
             break;
         case 'TITLE':
             ctx.scene.session.create_event.event.title = ctx.message.text;
-            ctx.scene.session.create_event.curr = 'FROM'
             return genReply(ctx)
-        case 'FROM':
-
-
-            break;
         case 'TO':
+            axios.put(`${process.env['BACKEND_URL']}/parse/date`,
+                {text: ctx.message.text})
+                .then(async resp => {
+                    let event = ctx.scene.session.create_event.event;
+                    if (resp.data.date) {
+                        event.to = new Date(resp.data.date).toISOString();
+                    } else {
+                        return sendError(ctx, 'Дата не распознана, попробуйте еще раз');
+                    }
+                    ctx.scene.session.create_event.curr = 'TITLE';
+                    if (ctx.scene.session.create_event.error_message_id !== 0) {
+                        ctx.telegram.deleteMessage(ctx.scene.session.create_event.cid,
+                            ctx.scene.session.create_event.error_message_id);
+                        ctx.scene.session.create_event.error_message_id = 0;
+                    }
+                    return genReply(ctx)
+                })
 
             break;
         case 'DESC':
@@ -320,6 +309,11 @@ CreateEventScene.action('create_event_fullday', ctx => {
 
 CreateEventScene.action('create_event_users_add', ctx => {
     ctx.scene.session.create_event.curr = 'USERS';
+    return genReply(ctx);
+})
+
+CreateEventScene.action('create_event_title_add', ctx => {
+    ctx.scene.session.create_event.curr = 'TITLE';
     return genReply(ctx);
 })
 

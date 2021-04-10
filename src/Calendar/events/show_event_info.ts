@@ -10,8 +10,11 @@ function genHeader(event: Event) {
         return ''
     }
 
+    if (event.from) {
+        from = new Date(event.from);
+    }
+
     if (!event.fullDay) {
-        from = new Date(event.from!);
         if (event.to) {
             to = new Date(event.to);
         }
@@ -21,10 +24,11 @@ function genHeader(event: Event) {
     replyMdStr += `<b>${event.title}</b>` + '\n\n⏰ '
     moment.locale('ru');
     if (event.fullDay) {
-        replyMdStr += 'Весь день';
+        replyMdStr += GetDatetimeHTMLString(from, true)
+        replyMdStr += ' весь день';
     } else {
         if (event.to) {
-            replyMdStr += GetDatetimeHTMLString(from, to);
+            replyMdStr += GetDatetimeHTMLString(from, false, to);
         } else {
             replyMdStr += GetDatetimeHTMLString(from)
         }

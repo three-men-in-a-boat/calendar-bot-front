@@ -1,9 +1,10 @@
 import moment from "moment";
 
-export default function GetDatetimeHTMLString(from: Date, to?: Date) {
+export default function GetDatetimeHTMLString(from: Date, fullday?: boolean, to?: Date, ) {
 
     let retStr = ''
 
+    //TODO исправить формат вывода 22 марта - 24 марта 18:00-20:00
     if (from.getDate() === new Date().getDate()) {
         retStr += 'Cегодня'
     } else if (from.getDate() === new Date().getDate() + 1) {
@@ -19,13 +20,15 @@ export default function GetDatetimeHTMLString(from: Date, to?: Date) {
         }
     }
 
-    retStr += ', <u>'
-    retStr += moment(from.toISOString()).format('LT')
-    if (to) {
-        retStr += ' - ';
-        retStr += moment(to.toISOString()).format('LT')
+    if (!fullday) {
+        retStr += ', <u>'
+        retStr += moment(from.toISOString()).format('LT')
+        if (to) {
+            retStr += ' - ';
+            retStr += moment(to.toISOString()).format('LT')
+        }
+        retStr += '</u>'
     }
-    retStr += '</u>'
 
     return retStr
 }
