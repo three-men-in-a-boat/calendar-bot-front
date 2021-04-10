@@ -303,7 +303,7 @@ CreateEventScene.action('create_event_create', ctx => {
 
 CreateEventScene.action('create_event_fullday', ctx => {
     ctx.scene.session.create_event.event.fullDay = true;
-    ctx.scene.session.create_event.curr = 'DESC';
+    ctx.scene.session.create_event.curr = 'TITLE';
     return genReply(ctx);
 })
 
