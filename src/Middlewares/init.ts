@@ -6,12 +6,34 @@ export default async function InitMiddleware(ctx: CustomContext, next: Function)
     if (!ctx.redis_client) {
         const client = redis.createClient({db:10})
         ctx.redis_client = client
+    }
+
+    if (!ctx.scene.session.redis_client) {
+        const client = redis.createClient({db:10})
         ctx.scene.session.redis_client = client
     }
+
+
 
     ctx.scene.session.create_event ??= {
         created: false,
         curr: 'INIT',
+        event: {
+            uid:uuid(),
+            title: "",
+            description: "",
+            from: "",
+            to: "",
+            fullDay: false,
+            attendees: []
+        },
+        mid: 0,
+        cid: 0,
+        error_message_id: 0
+    }
+
+    ctx.scene.session.find_time ??= {
+        founded: false,
         event: {
             uid:uuid(),
             title: "",

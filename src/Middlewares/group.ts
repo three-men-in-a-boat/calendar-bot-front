@@ -2,7 +2,7 @@ import axios from 'axios';
 import CustomContext from "../Models/CustomContext";
 import getChatType from "../utils/get_chat_type";
 
-const whitelist = ['/start', '/today', '/next', '/date', '/create'];
+const whitelist = ['/start', '/today', '/next', '/date', '/create', '/find_time'];
 
 export default async function GroupMiddleware(ctx: CustomContext, next: Function) {
     if (ctx.from) {

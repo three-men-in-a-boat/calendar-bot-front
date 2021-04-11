@@ -11,8 +11,17 @@ interface CreateEventData {
   error_message_id: number
 }
 
+interface FindTimeData {
+  founded: boolean
+  event: Event
+  mid: number,
+  cid: number,
+  error_message_id: number
+}
+
 interface SessionData extends Scenes.SceneSessionData{
   create_event: CreateEventData
+  find_time: FindTimeData
   redis_client: redis.RedisClient
 }
 
