@@ -226,6 +226,12 @@ FindTimeScene.action('find_time_stop', ctx => {
     return ctx.scene.leave();
 })
 
+FindTimeScene.action('find_time_create', ctx => {
+    console.log(ctx)
+})
+
+FindTimeScene.on('poll', (ctx) => console.log('Poll update', ctx.poll))
+FindTimeScene.on('poll_answer', (ctx) => console.log('Poll answer', ctx.pollAnswer))
 
 FindTimeScene.leave(ctx => {
     if (ctx.scene.session.find_time.founded) {
