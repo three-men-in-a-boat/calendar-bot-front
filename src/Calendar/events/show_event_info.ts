@@ -1,6 +1,35 @@
 import Event from "../../Models/Event";
 import moment from "moment";
 import GetDatetimeHTMLString from "../../utils/get_datetime_html_string";
+import Attendee from "../../Models/Attendee";
+
+function showUsersInfo(users: Attendee[], organizer?: Attendee) {
+    let replyMdStr = ''
+    let sendTitleAtt: boolean = false
+    for (let user of users) {
+        if (user.email !== 'calendar@internal') {
+            if (!sendTitleAtt) {
+                replyMdStr += '-------------------------------------\n';
+                replyMdStr += '<u><i>Участники:</i></u>\n';
+                sendTitleAtt = true;
+            }
+            replyMdStr += '\n' + (user.name ? user.name : '') + ' (' + user.email + ') '
+            if (organizer && organizer.email === user.email) {
+                replyMdStr += ' - Организатор'
+            } else {
+                if (user.status === 'ACCEPTED') {
+                    replyMdStr += ' ✅'
+                } else if (user.status === 'DECLINED') {
+                    replyMdStr += ' ❌'
+                } else {
+                    replyMdStr += ' �'
+                }
+            }
+        }
+    }
+
+    return replyMdStr
+}
 
 function genHeader(event: Event) {
     let from = new Date();
@@ -70,28 +99,8 @@ function createFullHTMLStr(event: Event, user_id?: number, user_name?: string) {
 
     replyMdStr += '\n';
 
-    let sendTitleAtt: boolean = false
-    for (let user of event.attendees) {
-        if (user.email !== 'calendar@internal') {
-            if (!sendTitleAtt) {
-                replyMdStr += '-------------------------------------\n';
-                replyMdStr += '<u><i>Участники:</i></u>\n';
-                sendTitleAtt = true;
-            }
-            replyMdStr += '\n' + (user.name ? user.name : '') + ' (' + user.email + ') '
-            if (event.organizer && event.organizer.email === user.email) {
-                replyMdStr += ' - Организатор'
-            } else {
-                if (user.status === 'ACCEPTED') {
-                    replyMdStr += ' ✅'
-                } else if (user.status === 'DECLINED') {
-                    replyMdStr += ' ❌'
-                } else {
-                    replyMdStr += ' �'
-                }
-            }
-        }
-    }
+    replyMdStr += showUsersInfo(event.attendees, event.organizer);
+
     replyMdStr += '\n'
 
 
@@ -108,4 +117,4 @@ function createFullHTMLStr(event: Event, user_id?: number, user_name?: string) {
     return replyMdStr
 }
 
-export {createFullHTMLStr, createShortHTMLStr};
+export {createFullHTMLStr, createShortHTMLStr, showUsersInfo};

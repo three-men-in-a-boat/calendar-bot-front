@@ -290,7 +290,11 @@ CreateEventScene.action('create_event_create', ctx => {
     )
         .then(resp => {
             ctx.scene.session.create_event.created = true;
-            ctx.scene.session.redis_client.set(id.slice(0, 20), resp.data);
+            const redis_data = {
+                event_data: ctx.scene.session.create_event.event,
+                resp_data: JSON.parse(resp.data)
+            };
+            ctx.scene.session.redis_client.set(id.slice(0, 20), JSON.stringify(redis_data));
             return ctx.scene.leave();
         })
         .catch(async (err: AxiosError) => {
