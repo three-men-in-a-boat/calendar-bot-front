@@ -45,7 +45,10 @@ export default async function InitMiddleware(ctx: CustomContext, next: Function)
         },
         mid: 0,
         cid: 0,
-        error_message_id: 0
+        poll_mid: 0,
+        error_message_id: 0,
+        day_period: undefined,
+        long: 0
     }
     return next()
 }
