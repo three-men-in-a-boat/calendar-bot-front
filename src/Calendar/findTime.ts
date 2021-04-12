@@ -7,7 +7,7 @@ async function findTimeCallback(ctx: CustomContext) {
         return ctx.reply('Данная функция поддерживается только в групповых чатах');
     }
 
-    return ctx.scene.enter('find_time_scene');
+    return ctx.scene.enter('create_event', {find_time: true});
 }
 
 export default function FindTime(bot: Telegraf<CustomContext>) {

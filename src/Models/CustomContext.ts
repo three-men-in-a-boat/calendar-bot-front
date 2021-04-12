@@ -32,5 +32,6 @@ export default interface CustomContext extends Context {
     actionName: string;
     redis_client: redis.RedisClient;
 
+
     scene: Scenes.SceneContextScene<CustomContext, SessionData>
 }

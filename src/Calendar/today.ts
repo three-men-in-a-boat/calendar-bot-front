@@ -4,7 +4,6 @@ import Event from '../Models/Event';
 import {EventCard} from "../utils/event_card";
 import getId from "../utils/getId";
 import CustomContext from "../Models/CustomContext";
-import FindTimeScene from "../Scenes/find_time";
 
 async function todayCallback(ctx: CustomContext) {
     axios.get(`${process.env['BACKEND_URL']}/telegram/user/${getId(ctx)}/events/today`)
