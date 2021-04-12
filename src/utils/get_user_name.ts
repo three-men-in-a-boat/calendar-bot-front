@@ -1,6 +1,6 @@
 import CustomContext from "../Models/CustomContext";
 
-export default function getUserName(ctx: CustomContext): string {
+export default function getUserName(ctx: CustomContext): string|undefined {
     if (ctx.message) {
         return ctx.message!.from.first_name + ` ${ctx.message!.from.last_name ? ctx.message!.from.last_name : ''}`
     } else {
@@ -9,5 +9,5 @@ export default function getUserName(ctx: CustomContext): string {
         }
     }
 
-    throw new Error("Can't find user name in context");
+    return undefined;
 }

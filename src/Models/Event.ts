@@ -1,18 +1,18 @@
-import User from './User';
 import CalendarInfo from "./CalendarInfo";
 import Location from "./Location";
+import Attendee from "./Attendee";
 
 export default interface Event {
   uid: string
-  title: string;
+  title?: string;
   from?: string;
   to?: string;
   fullDay: boolean;
   description?: string;
   location?: Location;
-  calendar: CalendarInfo
+  calendar?: CalendarInfo
   call?: string
-  attendees: Array<User>
-  organizer: User
+  attendees: Attendee[]
+  organizer?: Attendee
   payload?: string
 }

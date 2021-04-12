@@ -1,6 +1,6 @@
 import CustomContext from "../Models/CustomContext";
 
-export default function getChatType(ctx: CustomContext): string {
+export default function getChatType(ctx: CustomContext): "private" | "group" | "channel" | "supergroup" | undefined {
     if (ctx.message) {
         return ctx.message.chat.type
     } else {
@@ -9,5 +9,5 @@ export default function getChatType(ctx: CustomContext): string {
         }
     }
 
-    throw new Error("Can't find chat type id in context");
+    return undefined;
 }

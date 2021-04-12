@@ -1,18 +1,22 @@
-import CreateEvent from "../Models/CreateEvent";
-import GetDatetimeHTMLString from "./get_datetime_html_string";
-import CustomContext from "../Models/CustomContext";
-import getUserName from "./get_user_name";
-import getChatType from "./get_chat_type";
+import GetDatetimeHTMLString from "../../utils/get_datetime_html_string";
+import CustomContext from "../../Models/CustomContext";
+import getUserName from "../../utils/get_user_name";
+import getChatType from "../../utils/get_chat_type";
+import Event from "../../Models/Event";
+import {showUsersInfo} from "./show_event_info";
 
-function genEventReply(event: CreateEvent, name: string | undefined = undefined) {
+function genEventReply(event: Event, name: string | undefined = undefined) {
     let retStr = `<b>${name ? name : 'Вы'} создали событие ${event.title}</b>\n\n`;
 
     retStr += '⏰ '
     if (event.fullDay) {
         retStr += 'Весь день\n'
     } else {
-        retStr += GetDatetimeHTMLString(new Date(event.from!), new Date(event.to!));
+        retStr += GetDatetimeHTMLString(new Date(event.from!), false, new Date(event.to!));
     }
+
+    retStr += '\n'
+    retStr += showUsersInfo(event.attendees);
 
     return retStr
 }
@@ -41,9 +45,9 @@ function genEventKeyboard(uid: string) {
     }
 }
 
-export default function CreateEventCard(ctx: CustomContext, uid: string) {
+export default function CreateEventCard(ctx: CustomContext, uid: string, event?: Event) {
     if (getChatType(ctx) === 'group') {
-        return ctx.editMessageText(genEventReply(ctx.scene.session.create_event.event, getUserName(ctx)), {
+        return ctx.editMessageText(genEventReply(event ? event :ctx.scene.session.create_event.event, getUserName(ctx)), {
             parse_mode: 'HTML',
             reply_markup: genEventKeyboard(uid)
         })

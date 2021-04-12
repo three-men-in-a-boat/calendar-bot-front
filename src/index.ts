@@ -21,7 +21,16 @@ if (!token) {
 
 const bot = new Telegraf<CustomContext>(token);
 
+
+
 bot.use((new LocalSession({ database: 'db.json' })).middleware())
+
+bot.on('poll', (ctx) => {
+  return;
+})
+bot.on('poll_answer', (ctx) => {
+  return;
+})
 
 bot.use(stage.middleware());
 bot.use(InitMiddleware);
@@ -29,9 +38,10 @@ bot.use(AuthMiddleware);
 bot.use(GroupMiddleware)
 
 
-Base(bot);
+
 Calendar(bot)
 EventCardHandler(bot);
+Base(bot);
 
 bot
   .launch()
