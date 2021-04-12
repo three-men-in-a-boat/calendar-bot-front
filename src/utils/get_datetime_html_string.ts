@@ -4,6 +4,7 @@ export default function GetDatetimeHTMLString(from: Date, fullday?: boolean, to?
 
     let retStr = ''
 
+    moment.locale('ru');
     //TODO исправить формат вывода 22 марта - 24 марта 18:00-20:00
     if (from.getDate() === new Date().getDate()) {
         retStr += 'Cегодня'

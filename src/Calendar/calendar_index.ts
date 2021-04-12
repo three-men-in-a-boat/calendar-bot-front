@@ -5,6 +5,7 @@ import CustomContext from '../Models/CustomContext';
 import Next from "./next";
 import CreateEvent from "./create_event";
 import EventHandlers from "./events/event_handlers";
+import FindTime from "./findTime";
 
 export default function Calendar(bot: Telegraf<CustomContext>) {
   Today(bot);
@@ -12,4 +13,5 @@ export default function Calendar(bot: Telegraf<CustomContext>) {
   Next(bot);
   CreateEvent(bot);
   EventHandlers(bot);
+  FindTime(bot);
 }

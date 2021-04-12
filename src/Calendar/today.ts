@@ -24,6 +24,7 @@ async function todayCallback(ctx: CustomContext) {
 }
 
 export default function Today(bot: Telegraf<CustomContext>) {
+
     bot.command('today', ctx => {
         return todayCallback(ctx);
     });
