@@ -26,6 +26,10 @@ export default function EventHandlers(bot: Telegraf<CustomContext>) {
                                     name: userInfo.name
                                 }
 
+                                if (parsed_data.event_data.organizer?.email === attendee.email) {
+                                    return;
+                                }
+
                                 const isUserInEvent = parsed_data.event_data.attendees.filter(curr => {
                                     return curr.email === attendee.email
                                 })

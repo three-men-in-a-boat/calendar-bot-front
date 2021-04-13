@@ -11,9 +11,10 @@ import getMessageId from "../utils/get_message_id";
 import sendError from "../utils/send_error";
 import moment from "moment";
 import ParsedEvent from "../Models/ParsedEvent";
+import UserInfo from "../Models/UserInfo";
+import Attendee from "../Models/Attendee";
 
 const CreateEventScene = new Scenes.BaseScene<CustomContext>('create_event');
-
 
 
 function genChooseDaytimeButtons() {
@@ -565,8 +566,21 @@ CreateEventScene.action('create_event_create', ctx => {
         `${process.env['BACKEND_URL']}/telegram/user/${getId(ctx)}/events/event/create`,
         ctx.scene.session.create_event.event
     )
-        .then(resp => {
+        .then(async resp => {
             ctx.scene.session.create_event.created = true;
+
+            const resp_info = await axios.get(`${process.env['BACKEND_URL']}/oauth/telegram/user/${getId(ctx)}/info`)
+
+            const userInfo = resp_info.data as UserInfo;
+            const organizer: Attendee = {
+                role: 'REQUIRED',
+                email: userInfo.email,
+                name: userInfo.name,
+                status: 'ACCEPTED'
+            }
+            ctx.scene.session.create_event.event.organizer = organizer;
+            ctx.scene.session.create_event.event.attendees.push(organizer);
+
             const redis_data = {
                 event_data: ctx.scene.session.create_event.event,
                 resp_data: JSON.parse(resp.data)
