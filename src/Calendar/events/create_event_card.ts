@@ -4,6 +4,10 @@ import getUserName from "../../utils/get_user_name";
 import getChatType from "../../utils/get_chat_type";
 import Event from "../../Models/Event";
 import {showUsersInfo} from "./show_event_info";
+import axios from "axios";
+import getId from "../../utils/getId";
+import UserInfo from "../../Models/UserInfo";
+import Attendee from "../../Models/Attendee";
 
 function genEventReply(event: Event, name: string | undefined = undefined) {
     let retStr = `<b>${name ? name : 'Вы'} создали событие ${event.title}</b>\n\n`;
@@ -16,7 +20,7 @@ function genEventReply(event: Event, name: string | undefined = undefined) {
     }
 
     retStr += '\n'
-    retStr += showUsersInfo(event.attendees);
+    retStr += showUsersInfo(event.attendees, event.organizer);
 
     return retStr
 }
@@ -45,12 +49,13 @@ function genEventKeyboard(uid: string) {
     }
 }
 
-export default function CreateEventCard(ctx: CustomContext, uid: string, event?: Event) {
+export default async function CreateEventCard(ctx: CustomContext, uid: string, event?: Event) {
     if (getChatType(ctx) === 'group') {
-        return ctx.editMessageText(genEventReply(event ? event :ctx.scene.session.create_event.event, getUserName(ctx)), {
+        return ctx.editMessageText(genEventReply(event ? event : ctx.scene.session.create_event.event, getUserName(ctx)), {
             parse_mode: 'HTML',
             reply_markup: genEventKeyboard(uid)
         })
+
     } else {
         return ctx.editMessageText(genEventReply(ctx.scene.session.create_event.event), {
             parse_mode: 'HTML',

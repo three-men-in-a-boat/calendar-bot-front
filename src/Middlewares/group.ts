@@ -10,7 +10,7 @@ export default async function GroupMiddleware(ctx: CustomContext, next: Function
             // Поле text есть - в типах не описано
             if (getChatType(ctx) === 'group') {
                 // @ts-ignore
-                if (ctx.message.text.includes(process.env['BOT_NAME'])) {// @ts-ignore
+                if (ctx.message.text && ctx.message.text.includes(process.env['BOT_NAME'])) {// @ts-ignore
                     let parsed_message = ctx.message.text.split('@')
                     if (parsed_message.length === 2 && parsed_message[1] === process.env['BOT_NAME']) {
                         if (whitelist.includes(parsed_message[0])) {
