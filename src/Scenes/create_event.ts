@@ -424,7 +424,10 @@ CreateEventScene.on('text', async ctx => {
     if (ctx.scene.state.find_time) {
         if (!ctx.scene.session.find_time.event.from) {
             axios.put(`${process.env['BACKEND_URL']}/parse/date`,
-                {text: ctx.message.text})
+                {
+                    timezone: "Europe/Moscow",
+                    text: ctx.message.text
+                })
                 .then(resp => {
                     if (!resp.data.date) {
                         if (ctx.scene.session.find_time.error_message_id !== 0) {
@@ -485,7 +488,10 @@ CreateEventScene.on('text', async ctx => {
         switch (ctx.scene.session.create_event.curr) {
             case 'INIT':
                 axios.put(`${process.env['BACKEND_URL']}/parse/date`,
-                    {text: ctx.message.text})
+                    {
+                        timezone: "Europe/Moscow",
+                        text: ctx.message.text
+                    })
                     .then(async resp => {
                         let event = ctx.scene.session.create_event.event;
                         event.title = 'Без названия';
@@ -508,7 +514,10 @@ CreateEventScene.on('text', async ctx => {
                 return genReply(ctx)
             case 'TO':
                 axios.put(`${process.env['BACKEND_URL']}/parse/date`,
-                    {text: ctx.message.text})
+                    {
+                        timezone: "Europe/Moscow",
+                        text: ctx.message.text
+                    })
                     .then(async resp => {
                         let event = ctx.scene.session.create_event.event;
                         if (resp.data.date) {
@@ -617,7 +626,10 @@ CreateEventScene.action('find_time_create', ctx => {
     })
 
     axios.put(`${process.env['BACKEND_URL']}/parse/event`,
-        {text: `${getDayText(ctx.scene.session.find_time.event.from!)} ${text}`})
+        {
+            timezone: "Europe/Moscow",
+            text: `${getDayText(ctx.scene.session.find_time.event.from!)} ${text}`
+        })
         .then(async res => {
             const info = res.data as ParsedEvent;
             ctx.scene.session.find_time.event.from = new Date(info.event_start!).toISOString()
