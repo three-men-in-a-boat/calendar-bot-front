@@ -14,6 +14,8 @@ import ParsedEvent from "../Models/ParsedEvent";
 
 const CreateEventScene = new Scenes.BaseScene<CustomContext>('create_event');
 
+
+
 function genChooseDaytimeButtons() {
     return {
         inline_keyboard: [
@@ -137,7 +139,7 @@ function getDayText(date: string) {
     } else if (from.getDate() === new Date().getDate() + 1) {
         retStr += 'завтра'
     } else {
-        retStr += moment(from.toISOString()).format('D MMMM YYYY')
+        retStr += moment(date).format('D MMMM YYYY')
     }
 
     return retStr;
@@ -416,6 +418,7 @@ CreateEventScene.action('create_event_stop', ctx => {
     return ctx.scene.leave();
 })
 
+
 CreateEventScene.on('text', async ctx => {
     // @ts-ignore
     if (ctx.scene.state.find_time) {
@@ -620,7 +623,7 @@ CreateEventScene.action('find_time_create', ctx => {
             ctx.scene.session.find_time.event.from = new Date(info.event_start!).toISOString()
             ctx.scene.session.find_time.event.to = new Date(info.event_end!).toISOString()
             ctx.scene.session.find_time.founded = true;
-            ctx.deleteMessage();
+            ctx.stopPoll(ctx.update.callback_query.message!.message_id);
             ctx.scene.session.create_event.event = ctx.scene.session.find_time.event;
             ctx.scene.session.create_event.event.title = 'Без названия';
             ctx.scene.session.create_event.curr = 'TITLE';

@@ -5,6 +5,9 @@ import getChatType from "../utils/get_chat_type";
 const whitelist = ['/start'];
 
 export default async function AuthMiddleware(ctx: CustomContext, next: Function) {
+    if (!ctx.scene) {
+        return next();
+    }
     if (getChatType(ctx) === 'group') {
         return next();
     }
