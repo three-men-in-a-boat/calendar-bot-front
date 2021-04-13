@@ -11,7 +11,9 @@ export default async function InitMiddleware(ctx: CustomContext, next: Function)
     if (ctx.scene && !ctx.scene.session.redis_client) {
         ctx.scene.session.redis_client = redis.createClient({db: 10})
     }
-
+    if (!ctx.scene) {
+        return next();
+    }
     ctx.scene.session.create_event ??= {
         created: false,
         curr: 'INIT',

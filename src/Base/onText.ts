@@ -6,7 +6,10 @@ import ParsedEvent from "../Models/ParsedEvent";
 export default function onText(bot: Telegraf<CustomContext>) {
     bot.on('text', ctx => {
         axios.put(`${process.env['BACKEND_URL']}/parse/event`,
-            {text: ctx.message.text})
+            {
+                timezone: "Europe/Moscow",
+                text: ctx.message.text
+            })
             .then(resp => {
                 if (Object.keys(resp.data).length === 0) {
                     return ctx.reply('Простите, но мы не смогли распознать событие в вашем сообщении. ' +

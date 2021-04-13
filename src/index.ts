@@ -9,6 +9,7 @@ import InitMiddleware from "./Middlewares/init";
 import stage from "./Scenes/scenes_index";
 import GroupMiddleware from "./Middlewares/group";
 import LocalSession from 'telegraf-session-local';
+import CreateEventScene from "./Scenes/create_event";
 
 config();
 
@@ -25,17 +26,14 @@ const bot = new Telegraf<CustomContext>(token);
 
 bot.use((new LocalSession({ database: 'db.json' })).middleware())
 
-bot.on('poll', (ctx) => {
-  return;
-})
-bot.on('poll_answer', (ctx) => {
-  return;
-})
+bot.on('poll', (ctx) => console.log('Poll update bot', ctx.poll))
+bot.on('poll_answer', (ctx) => console.log('Poll answer bot', ctx.pollAnswer))
 
 bot.use(stage.middleware());
 bot.use(InitMiddleware);
 bot.use(AuthMiddleware);
-bot.use(GroupMiddleware)
+bot.use(GroupMiddleware);
+
 
 
 

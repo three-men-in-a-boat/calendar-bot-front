@@ -39,4 +39,8 @@ export default async function GroupMiddleware(ctx: CustomContext, next: Function
             return next();
         }
     }
+
+    if (!ctx.scene) {
+        return next();
+    }
 }

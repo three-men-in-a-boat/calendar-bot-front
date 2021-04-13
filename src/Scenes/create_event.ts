@@ -14,6 +14,8 @@ import ParsedEvent from "../Models/ParsedEvent";
 
 const CreateEventScene = new Scenes.BaseScene<CustomContext>('create_event');
 
+
+
 function genChooseDaytimeButtons() {
     return {
         inline_keyboard: [
@@ -137,7 +139,7 @@ function getDayText(date: string) {
     } else if (from.getDate() === new Date().getDate() + 1) {
         retStr += 'завтра'
     } else {
-        retStr += moment(from.toISOString()).format('D MMMM YYYY')
+        retStr += moment(date).format('D MMMM YYYY')
     }
 
     return retStr;
@@ -416,12 +418,16 @@ CreateEventScene.action('create_event_stop', ctx => {
     return ctx.scene.leave();
 })
 
+
 CreateEventScene.on('text', async ctx => {
     // @ts-ignore
     if (ctx.scene.state.find_time) {
         if (!ctx.scene.session.find_time.event.from) {
             axios.put(`${process.env['BACKEND_URL']}/parse/date`,
-                {text: ctx.message.text})
+                {
+                    timezone: "Europe/Moscow",
+                    text: ctx.message.text
+                })
                 .then(resp => {
                     if (!resp.data.date) {
                         if (ctx.scene.session.find_time.error_message_id !== 0) {
@@ -482,7 +488,10 @@ CreateEventScene.on('text', async ctx => {
         switch (ctx.scene.session.create_event.curr) {
             case 'INIT':
                 axios.put(`${process.env['BACKEND_URL']}/parse/date`,
-                    {text: ctx.message.text})
+                    {
+                        timezone: "Europe/Moscow",
+                        text: ctx.message.text
+                    })
                     .then(async resp => {
                         let event = ctx.scene.session.create_event.event;
                         event.title = 'Без названия';
@@ -505,7 +514,10 @@ CreateEventScene.on('text', async ctx => {
                 return genReply(ctx)
             case 'TO':
                 axios.put(`${process.env['BACKEND_URL']}/parse/date`,
-                    {text: ctx.message.text})
+                    {
+                        timezone: "Europe/Moscow",
+                        text: ctx.message.text
+                    })
                     .then(async resp => {
                         let event = ctx.scene.session.create_event.event;
                         if (resp.data.date) {
@@ -614,13 +626,16 @@ CreateEventScene.action('find_time_create', ctx => {
     })
 
     axios.put(`${process.env['BACKEND_URL']}/parse/event`,
-        {text: `${getDayText(ctx.scene.session.find_time.event.from!)} ${text}`})
+        {
+            timezone: "Europe/Moscow",
+            text: `${getDayText(ctx.scene.session.find_time.event.from!)} ${text}`
+        })
         .then(async res => {
             const info = res.data as ParsedEvent;
             ctx.scene.session.find_time.event.from = new Date(info.event_start!).toISOString()
             ctx.scene.session.find_time.event.to = new Date(info.event_end!).toISOString()
             ctx.scene.session.find_time.founded = true;
-            ctx.deleteMessage();
+            ctx.stopPoll(ctx.update.callback_query.message!.message_id);
             ctx.scene.session.create_event.event = ctx.scene.session.find_time.event;
             ctx.scene.session.create_event.event.title = 'Без названия';
             ctx.scene.session.create_event.curr = 'TITLE';
