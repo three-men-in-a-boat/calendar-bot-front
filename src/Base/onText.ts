@@ -7,7 +7,6 @@ export default function onText(bot: Telegraf<CustomContext>) {
     bot.on('text', ctx => {
         axios.put(`${process.env['BACKEND_URL']}/parse/event`,
             {
-                timezone: "Europe/Moscow",
                 text: ctx.message.text
             })
             .then(resp => {
@@ -26,7 +25,7 @@ export default function onText(bot: Telegraf<CustomContext>) {
                 }
 
                 if (event_info.event_end) {
-                    event.from = new Date(event_info.event_end).toISOString();
+                    event.to = new Date(event_info.event_end).toISOString();
                     ctx.scene.session.create_event.curr = 'TITLE';
                 }
 
