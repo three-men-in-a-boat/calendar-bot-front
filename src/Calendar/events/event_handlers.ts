@@ -15,7 +15,7 @@ export default function EventHandlers(bot: Telegraf<CustomContext>) {
             .then(_ => {
                 axios.get(`${process.env['BACKEND_URL']}/oauth/telegram/user/${getId(ctx)}/info`)
                     .then(resp => {
-                        ctx.redis_client.get(data.p, (err, redis_data) => {
+                        ctx.redis_client.get(data.p, async (err, redis_data) => {
                             if (redis_data) {
                                 const parsed_data = JSON.parse(redis_data) as RedisCreateEventData;
                                 const userInfo = resp.data as UserInfo;
@@ -24,6 +24,10 @@ export default function EventHandlers(bot: Telegraf<CustomContext>) {
                                     role: 'REQUIRED',
                                     status: data.a === 'event_user_accept' ? 'ACCEPTED' : 'DECLINED',
                                     name: userInfo.name
+                                }
+
+                                if (parsed_data.event_data.organizer?.email === attendee.email) {
+                                    return;
                                 }
 
                                 const isUserInEvent = parsed_data.event_data.attendees.filter(curr => {
@@ -37,10 +41,33 @@ export default function EventHandlers(bot: Telegraf<CustomContext>) {
                                         parsed_data.event_data.attendees.forEach(curr => {
                                             if (curr.email === attendee.email) {
                                                 curr.status = attendee.status;
+                                                (async () => {
+                                                const resp_status = await axios.put(`${process.env['BACKEND_URL']}/telegram/user/${getId(ctx)}/events/calendar/change/attendee/status`,
+                                                    {
+                                                        eventID: parsed_data.resp_data.data.createEvent.uid,
+                                                        calendarID: parsed_data.resp_data.data.createEvent.calendar.uid,
+                                                        status: attendee.status
+                                                    })
+                                                })()
                                             }
                                         })
                                     }
                                 } else {
+                                    const resp_add = await axios.put(`${process.env['BACKEND_URL']}/telegram/user/${parsed_data.event_data.user_tg_id!}/events/calendar/add/attendee`,
+                                        {
+                                            eventID: parsed_data.resp_data.data.createEvent.uid,
+                                            calendarID: parsed_data.resp_data.data.createEvent.calendar.uid,
+                                            email: attendee.email,
+                                            role: attendee.role
+                                        })
+
+
+                                    const resp_status = await axios.put(`${process.env['BACKEND_URL']}/telegram/user/${getId(ctx)}/events/calendar/change/attendee/status`,
+                                        {
+                                            eventID: parsed_data.resp_data.data.createEvent.uid,
+                                            calendarID: parsed_data.resp_data.data.createEvent.calendar.uid,
+                                            status: attendee.status
+                                        })
                                     parsed_data.event_data.attendees.push(attendee);
                                 }
                                 const typedContext = ctx as CustomContext;
