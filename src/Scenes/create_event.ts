@@ -639,11 +639,12 @@ CreateEventScene.action('find_time_create', ctx => {
             text = curr.text
         }
     })
+    const text_in = `${getDayText(ctx.scene.session.find_time.event.from!)} в${text.slice(1)}`
 
     axios.put(`${process.env['BACKEND_URL']}/parse/event`,
         {
             timezone: "Europe/Moscow",
-            text: `${getDayText(ctx.scene.session.find_time.event.from!)} ${text}`
+            text: text_in
         })
         .then(async res => {
             const info = res.data as ParsedEvent;
