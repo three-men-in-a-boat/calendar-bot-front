@@ -15,4 +15,5 @@ export default interface Event {
   attendees: Attendee[]
   organizer?: Attendee
   payload?: string
+  user_tg_id?: number
 }

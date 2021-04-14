@@ -580,6 +580,7 @@ CreateEventScene.action('create_event_create', ctx => {
             }
             ctx.scene.session.create_event.event.organizer = organizer;
             ctx.scene.session.create_event.event.attendees.push(organizer);
+            ctx.scene.session.create_event.event.user_tg_id = getId(ctx);
 
             const redis_data = {
                 event_data: ctx.scene.session.create_event.event,
